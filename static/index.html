@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JARVIS Glass Media & Drive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lightweight offline QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", "Helvetica Neue", sans-serif;
+      --bg-dark: #07090e;
+      --glass-bg: rgba(22, 27, 39, 0.62);
+      --glass-card: rgba(255, 255, 255, 0.05);
+      --glass-card-hover: rgba(255, 255, 255, 0.09);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-strong: rgba(255, 255, 255, 0.22);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.65);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --apple-blue: #0A84FF;
+      --apple-indigo: #5E5CE6;
+      --apple-purple: #BF5AF2;
+      --apple-teal: #64D2FF;
+      --apple-green: #30D158;
+      --apple-orange: #FF9F0A;
+      --apple-red: #FF453A;
+      --accent-grad: linear-gradient(135deg, #0A84FF 0%, #5E5CE6 50%, #BF5AF2 100%);
+      --power-grad: linear-gradient(135deg, #FF453A 0%, #FF9F0A 100%);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-xl: 30px;
+      --blur-val: blur(28px) saturate(190%);
+      --shadow-glass: 0 16px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+      --trans-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-dark: #f0f3f8;
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-card: rgba(255, 255, 255, 0.75);
+      --glass-card-hover: rgba(255, 255, 255, 0.95);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --glass-border-strong: rgba(0, 0, 0, 0.16);
+      --text-primary: #1d1d1f;
+      --text-secondary: rgba(0, 0, 0, 0.65);
+      --text-muted: rgba(0, 0, 0, 0.4);
+      --shadow-glass: 0 16px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color 0.4s ease;
+      padding-bottom: 90px;
+    }
+
+    /* Ambient Fluid Mesh Canvas */
+    .ambient-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.32;
+      animation: floatOrb 22s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 550px; height: 550px; background: #0A84FF; top: -150px; left: -100px; animation-duration: 25s; }
+    .orb-2 { width: 650px; height: 650px; background: #5E5CE6; bottom: -200px; right: -150px; animation-duration: 28s; }
+    .orb-3 { width: 450px; height: 450px; background: #BF5AF2; top: 35%; left: 35%; opacity: 0.22; animation-duration: 32s; }
+    .orb-4 { width: 400px; height: 400px; background: #30D158; bottom: 10%; left: -80px; opacity: 0.18; animation-duration: 20s; }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(60px, 40px) scale(1.08); }
+      100% { transform: translate(-40px, 60px) scale(0.95); }
+    }
+
+    .app-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 28px;
+    }
+
+    /* Glass Header */
+    header.glass-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-glass);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--accent-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(10, 132, 255, 0.4);
+    }
+    .brand-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+    .brand-text h1 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .brand-text span {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: block;
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Glass Buttons */
+    .glass-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.25s var(--trans-spring);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .glass-btn:hover {
+      background: var(--glass-card-hover);
+      border-color: var(--glass-border-strong);
+      transform: translateY(-1.5px);
+    }
+    .glass-btn:active {
+      transform: translateY(0.5px) scale(0.98);
+    }
+    .glass-btn.btn-primary {
+      background: var(--accent-grad);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 18px rgba(10, 132, 255, 0.35);
+    }
+    .glass-btn.btn-power {
+      background: rgba(255, 69, 58, 0.16);
+      border: 1px solid rgba(255, 69, 58, 0.4);
+      color: var(--apple-red);
+      font-weight: 700;
+    }
+    .glass-btn.btn-power:hover {
+      background: var(--power-grad);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(255, 69, 58, 0.45);
+    }
+
+    .badge-ip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--apple-green);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .badge-ip:hover {
+      background: rgba(48, 209, 88, 0.25);
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--apple-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--apple-green);
+      animation: pulseAnim 2s infinite;
+    }
+    @keyframes pulseAnim {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    /* Live PC Hardware Status Bar */
+    .system-metrics-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 12px 20px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-card);
+      overflow-x: auto;
+    }
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      padding: 4px 10px;
+      background: var(--glass-card);
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+    }
+    .metric-item strong {
+      color: var(--text-primary);
+    }
+    .metric-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* Storage Capacity Banner */
+    .storage-banner {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+    .storage-info {
+      flex: 1;
+      min-width: 260px;
+    }
+    .storage-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .storage-meta span {
+      color: var(--text-secondary);
+    }
+    .storage-meta strong {
+      color: var(--text-primary);
+    }
+    .progress-track {
+      width: 100%;
+      height: 9px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent-grad);
+      transition: width 0.8s var(--trans-spring);
+    }
+    .category-pills {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cat-stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      background: var(--glass-card);
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+    }
+    .cat-stat strong {
+      color: var(--text-primary);
+    }
+
+    /* Navigation Dock */
+    .glass-nav {
+      position: sticky;
+      top: 18px;
+      z-index: 100;
+      margin-bottom: 26px;
+      display: flex;
+      justify-content: center;
+    }
+    .nav-dock {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: 999px;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.25s var(--trans-spring);
+    }
+    .nav-item:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .nav-item.active {
+      color: #fff;
+      background: var(--accent-grad);
+      box-shadow: 0 4px 18px rgba(10, 132, 255, 0.4);
+    }
+    .nav-item svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2;
+    }
+
+    /* Tab Views */
+    .tab-view {
+      display: none;
+      animation: fadeInView 0.35s ease forwards;
+    }
+    .tab-view.active {
+      display: block;
+    }
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Toolbar & Search */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px 18px 12px 44px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s;
+    }
+    .search-box input:focus {
+      background: var(--glass-card-hover);
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
+    }
+    .search-box svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover {
+      background: var(--glass-card-hover);
+      color: var(--text-primary);
+    }
+    .filter-btn.active {
+      background: rgba(255, 255, 255, 0.16);
+      color: var(--text-primary);
+      border-color: var(--glass-border-strong);
+      font-weight: 600;
+    }
+
+    /* Video Cards Grid */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 22px;
+    }
+    .media-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: all 0.3s var(--trans-spring);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .media-card:hover {
+      transform: translateY(-5px) scale(1.015);
+      border-color: var(--glass-border-strong);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .card-thumb-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .card-thumb {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .media-card:hover .card-thumb {
+      transform: scale(1.05);
+    }
+    .card-play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .media-card:hover .card-play-overlay {
+      opacity: 1;
+    }
+    .play-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(10, 132, 255, 0.5);
+      transform: scale(0.85);
+      transition: transform 0.25s var(--trans-spring);
+    }
+    .media-card:hover .play-circle {
+      transform: scale(1);
+    }
+    .play-circle svg {
+      width: 22px;
+      height: 22px;
+      fill: white;
+      margin-left: 2px;
+    }
+    .badge-duration {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .badge-category {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      color: var(--apple-teal);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(100, 210, 255, 0.25);
+    }
+
+    .card-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .card-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .icon-action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-action-btn:hover {
+      background: var(--glass-card-hover);
+      color: var(--text-primary);
+      border-color: var(--glass-border-strong);
+    }
+    .icon-action-btn.delete-btn:hover {
+      color: var(--apple-red);
+      background: rgba(255, 69, 58, 0.15);
+      border-color: rgba(255, 69, 58, 0.3);
+    }
+    .icon-action-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Drive Files List */
+    .files-container {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      box-shadow: var(--shadow-card);
+    }
+    .file-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      transition: background 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 16px;
+    }
+    .file-row:last-child {
+      border-bottom: none;
+    }
+    .file-row:hover {
+      background: var(--glass-card);
+    }
+    .file-leading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+    .file-type-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+    }
+    .file-type-icon.icon-videos { background: rgba(10, 132, 255, 0.15); color: var(--apple-blue); }
+    .file-type-icon.icon-audio { background: rgba(255, 159, 10, 0.15); color: var(--apple-orange); }
+    .file-type-icon.icon-photos { background: rgba(191, 90, 242, 0.15); color: var(--apple-purple); }
+    .file-type-icon.icon-documents { background: rgba(48, 209, 88, 0.15); color: var(--apple-green); }
+    .file-type-icon.icon-files { background: rgba(100, 210, 255, 0.15); color: var(--apple-teal); }
+    .file-type-icon svg { width: 20px; height: 20px; }
+
+    .file-details {
+      min-width: 0;
+    }
+    .file-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-submeta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+    .file-trailing {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* YouTube Studio */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+    }
+    .panel-header {
+      margin-bottom: 20px;
+    }
+    .panel-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .panel-header p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .yt-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .input-box {
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14.5px;
+      outline: none;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s;
+    }
+    .input-box:focus {
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
+    }
+    .options-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .opt-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .quality-selector {
+      display: flex;
+      gap: 8px;
+    }
+    .quality-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quality-btn.active {
+      background: var(--accent-grad);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
+    }
+    .presets-container {
+      margin-top: 24px;
+    }
+    .presets-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .preset-chip {
+      padding: 8px 16px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .preset-chip:hover {
+      background: var(--glass-card-hover);
+      border-color: var(--glass-border-strong);
+      transform: translateY(-1.5px);
+    }
+    .tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .task-card {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    .task-status-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-downloading { background: rgba(10, 132, 255, 0.2); color: var(--apple-blue); border: 1px solid rgba(10, 132, 255, 0.35); }
+    .badge-completed { background: rgba(48, 209, 88, 0.2); color: var(--apple-green); border: 1px solid rgba(48, 209, 88, 0.35); }
+    .badge-error { background: rgba(255, 69, 58, 0.2); color: var(--apple-red); border: 1px solid rgba(255, 69, 58, 0.35); }
+    .badge-queued { background: rgba(255, 159, 10, 0.2); color: var(--apple-orange); border: 1px solid rgba(255, 159, 10, 0.35); }
+    .task-progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .task-progress-fill {
+      height: 100%;
+      background: var(--accent-grad);
+      transition: width 0.3s;
+    }
+
+    /* Mobile Dropzone */
+    .upload-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .upload-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .dropzone-box {
+      border: 2px dashed var(--glass-border-strong);
+      border-radius: var(--radius-xl);
+      padding: 60px 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-card);
+      backdrop-filter: blur(14px);
+      cursor: pointer;
+      transition: all 0.3s var(--trans-spring);
+    }
+    .dropzone-box.drag-over {
+      border-color: var(--apple-blue);
+      background: rgba(10, 132, 255, 0.1);
+      transform: scale(1.01);
+    }
+    .dropzone-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: var(--accent-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4);
+    }
+    .dropzone-icon svg {
+      width: 36px;
+      height: 36px;
+      fill: white;
+    }
+    .dropzone-box h3 {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .dropzone-box p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      max-width: 360px;
+      margin-bottom: 20px;
+    }
+
+    .qr-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .qr-wrapper {
+      padding: 16px;
+      background: white;
+      border-radius: var(--radius-lg);
+      margin: 18px 0;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+    .qr-card h4 {
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .qr-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+    .qr-url-badge {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      color: var(--apple-blue);
+      font-weight: 600;
+      margin-top: 14px;
+      word-break: break-all;
+    }
+
+    /* Video Player Modal */
+    .video-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeInModal 0.3s ease;
+    }
+    .video-modal.active {
+      display: flex;
+    }
+    @keyframes fadeInModal {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-content {
+      width: 100%;
+      max-width: 960px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    }
+    .modal-header {
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 75%;
+    }
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .player-video-wrapper {
+      width: 100%;
+      background: black;
+      aspect-ratio: 16 / 9;
+    }
+    .player-video-wrapper video {
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+    .modal-footer {
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* PC Power Sheet / Modal */
+    .power-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .power-modal.active {
+      display: flex;
+    }
+    .power-sheet {
+      width: 100%;
+      max-width: 480px;
+      background: var(--glass-bg);
+      border: 1px solid rgba(255, 69, 58, 0.35);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 69, 58, 0.2);
+      text-align: center;
+      animation: fadeInModal 0.3s ease;
+    }
+    .power-icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--power-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      box-shadow: 0 8px 24px rgba(255, 69, 58, 0.5);
+    }
+    .power-icon-circle svg {
+      width: 32px;
+      height: 32px;
+      stroke: white;
+    }
+    .power-sheet h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .power-sheet p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+    .power-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .power-card-btn {
+      padding: 16px 12px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.25s;
+    }
+    .power-card-btn:hover {
+      background: var(--glass-card-hover);
+      border-color: var(--glass-border-strong);
+      transform: translateY(-2px);
+    }
+    .power-card-btn.danger-shutdown {
+      border-color: rgba(255, 69, 58, 0.4);
+      background: rgba(255, 69, 58, 0.12);
+      color: var(--apple-red);
+    }
+    .power-card-btn.danger-shutdown:hover {
+      background: var(--apple-red);
+      color: white;
+    }
+    .countdown-timer-box {
+      background: rgba(255, 69, 58, 0.15);
+      border: 1px solid rgba(255, 69, 58, 0.35);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .countdown-timer-box strong {
+      font-size: 22px;
+      color: var(--apple-red);
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Floating Apple Music Style Glass Audio Player */
+    .audio-player-dock {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      width: 92%;
+      max-width: 640px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: 999px;
+      padding: 10px 20px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 999;
+      transition: transform 0.4s var(--trans-spring);
+    }
+    .audio-player-dock.active {
+      transform: translateX(-50%) translateY(0);
+    }
+    .audio-album-art {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--power-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      animation: rotateArt 16s linear infinite;
+      animation-play-state: paused;
+    }
+    .audio-album-art.playing {
+      animation-play-state: running;
+    }
+    @keyframes rotateArt {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .audio-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .audio-track-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-primary);
+    }
+    .audio-track-time {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .audio-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .audio-play-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--accent-grad);
+      box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4);
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border-strong);
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: all 0.3s var(--trans-spring);
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .app-wrapper {
+        padding: 14px 16px 120px 16px;
+      }
+      header.glass-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .glass-nav {
+        position: fixed;
+        bottom: 16px;
+        top: auto;
+        left: 0;
+        right: 0;
+        margin-bottom: 0;
+      }
+      .nav-dock {
+        width: 92%;
+        max-width: 440px;
+        justify-content: space-around;
+      }
+      .nav-item {
+        padding: 8px 14px;
+        font-size: 12px;
+      }
+      .audio-player-dock {
+        bottom: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Mesh Canvas -->
+  <div class="ambient-canvas">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <div class="app-wrapper">
+
+    <!-- Top Glass Header -->
+    <header class="glass-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>JARVIS Media & Drive</h1>
+          <span>Apple Liquid Glass Media Hub</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Wi-Fi IP Badge -->
+        <div class="badge-ip" id="badgeIp" onclick="copyAccessUrl()" title="Click to copy Mobile URL">
+          <span class="pulse-dot"></span>
+          <span id="ipText">Loading Wi-Fi...</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="glass-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Dark/Light Mode">
+          🌓 Mode
+        </button>
+
+        <!-- 1-Click Remote Power Button -->
+        <button class="glass-btn btn-power" onclick="openPowerModal()" title="PC Remote Power & Controls">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+          Power
+        </button>
+
+        <button class="glass-btn btn-primary" onclick="switchTab('upload')">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Upload
+        </button>
+      </div>
+    </header>
+
+    <!-- Real-Time Hardware Performance Bar -->
+    <div class="system-metrics-bar">
+      <div class="metric-item">
+        <div class="metric-dot" style="background: var(--apple-blue);"></div>
+        CPU: <strong id="metricCpu">--%</strong>
+      </div>
+      <div class="metric-item">
+        <div class="metric-dot" style="background: var(--apple-purple);"></div>
+        RAM: <strong id="metricRam">-- GB / -- GB (--%)</strong>
+      </div>
+      <div class="metric-item" id="batteryMetricBox" style="display: none;">
+        <div class="metric-dot" style="background: var(--apple-green);"></div>
+        Battery: <strong id="metricBattery">--%</strong>
+      </div>
+      <div class="metric-item">
+        <div class="metric-dot" style="background: var(--apple-orange);"></div>
+        PC Uptime: <strong id="metricUptime">--</strong>
+      </div>
+    </div>
+
+    <!-- Storage Capacity & System Bar -->
+    <div class="storage-banner">
+      <div class="storage-info">
+        <div class="storage-meta">
+          <span>Drive Storage Usage</span>
+          <strong id="storageRatio">-- GB / -- GB (--%)</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="storageProgressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="category-pills">
+        <div class="cat-stat">🎬 Videos: <strong id="statVideos">0</strong></div>
+        <div class="cat-stat">🎵 Audio: <strong id="statAudio">0</strong></div>
+        <div class="cat-stat">🖼️ Photos: <strong id="statPhotos">0</strong></div>
+        <div class="cat-stat">📄 Docs: <strong id="statDocs">0</strong></div>
+        <div class="cat-stat">📦 Files: <strong id="statFiles">0</strong></div>
+      </div>
+    </div>
+
+    <!-- Navigation Dock -->
+    <div class="glass-nav">
+      <nav class="nav-dock">
+        <button class="nav-item active" onclick="switchTab('videos')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Videos
+        </button>
+        <button class="nav-item" onclick="switchTab('drive')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Drive Files
+        </button>
+        <button class="nav-item" onclick="switchTab('scraper')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          YouTube Scraper
+        </button>
+        <button class="nav-item" onclick="switchTab('upload')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload & Mobile
+        </button>
+      </nav>
+    </div>
+
+    <!-- ================= TAB 1: VIDEOS ================= -->
+    <div id="tabVideos" class="tab-view active">
+      <!-- Ready to Play Quick Access Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: var(--glass-card); border: 1px solid var(--glass-border); padding: 12px 18px; border-radius: var(--radius-md);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: var(--apple-blue); font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase;">
+            ⚡ Ready to Play
+          </span>
+          <span style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">Recent 4 Videos (Chanakya & Adda247 Skills)</span>
+        </div>
+        <button class="glass-btn btn-primary" style="padding: 7px 16px; font-size: 12px;" onclick="syncAllChannels(4)">
+          ⚡ Sync Recent 4 Videos
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="videoSearchInput" placeholder="Search videos by title or keyword..." oninput="handleVideoSearch()">
+        </div>
+        <button class="glass-btn" onclick="fetchFiles('videos')">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh Library
+        </button>
+      </div>
+
+      <div class="media-grid" id="videoGrid"></div>
+    </div>
+
+    <!-- ================= TAB 2: DRIVE FILES ================= -->
+    <div id="tabDrive" class="tab-view">
+      <div class="toolbar">
+        <div class="search-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="driveSearchInput" placeholder="Search all uploaded files..." oninput="handleDriveSearch()">
+        </div>
+        <div class="filter-pills">
+          <button class="filter-btn active" onclick="setDriveCategory('', this)">All Files</button>
+          <button class="filter-btn" onclick="setDriveCategory('videos', this)">🎬 Videos</button>
+          <button class="filter-btn" onclick="setDriveCategory('photos', this)">🖼️ Photos</button>
+          <button class="filter-btn" onclick="setDriveCategory('audio', this)">🎵 Audio</button>
+          <button class="filter-btn" onclick="setDriveCategory('documents', this)">📄 Docs</button>
+          <button class="filter-btn" onclick="setDriveCategory('files', this)">📦 Archives</button>
+        </div>
+      </div>
+
+      <div class="files-container" id="driveFilesContainer"></div>
+    </div>
+
+    <!-- ================= TAB 3: YOUTUBE SCRAPER STUDIO ================= -->
+    <div id="tabScraper" class="tab-view">
+      <div class="glass-panel">
+        <div class="panel-header">
+          <h2>YouTube Video & Channel Downloader</h2>
+          <p>Paste any YouTube video, playlist, or channel URL to download it straight into your laptop's local media server.</p>
+        </div>
+
+        <div class="yt-input-group">
+          <input type="text" id="ytUrlInput" class="input-box" placeholder="https://www.youtube.com/watch?v=... or https://youtube.com/@channel/videos">
+          
+          <div class="options-row">
+            <span class="opt-label">Format / Quality:</span>
+            <div class="quality-selector">
+              <button class="quality-btn active" data-quality="720" onclick="setQuality('720', this)">720p HD</button>
+              <button class="quality-btn" data-quality="1080" onclick="setQuality('1080', this)">1080p FHD</button>
+              <button class="quality-btn" data-quality="480" onclick="setQuality('480', this)">480p</button>
+              <button class="quality-btn" data-quality="audio" onclick="setQuality('audio', this)">MP3 Audio</button>
+            </div>
+
+            <span class="opt-label" style="margin-left: auto;">Channel Limit:</span>
+            <input type="number" id="ytLimitInput" class="input-box" value="3" min="1" max="15" style="width: 80px; padding: 8px 12px;">
+
+            <button class="glass-btn btn-primary" onclick="startYoutubeScrape()" style="padding: 10px 24px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Now
+            </button>
+          </div>
+        </div>
+
+        <div class="presets-container">
+          <div class="presets-title">Quick Scrape Presets (1-Click)</div>
+          <div class="preset-chips">
+            <div class="preset-chip" onclick="quickFillScrape('https://www.youtube.com/@BBCNews/videos')">🌍 BBC News World</div>
+            <div class="preset-chip" onclick="quickFillScrape('https://www.youtube.com/@wsj/videos')">📈 Wall Street Journal</div>
+            <div class="preset-chip" onclick="quickFillScrape('https://www.youtube.com/@DefenceSquad/videos')">🛡️ Defence Squad</div>
+            <div class="preset-chip" onclick="quickFillScrape('https://www.youtube.com/@THECHANAKYADIALOGUESHINDI/videos')">🎙️ The Chanakya Dialogues</div>
+            <div class="preset-chip" onclick="quickFillScrape('https://www.youtube.com/@Career247Official/videos')">💼 Career 247</div>
+          </div>
+        </div>
+
+        <!-- Tracked Channels Management -->
+        <div style="margin-top: 32px; margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">My Subscribed Channels</h2>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-top: 3px;">
+                Track your favorite channels and auto-download their recent 4 videos with 1 click.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="glass-btn btn-primary" onclick="syncAllChannels(4)">
+                ⚡ Sync All Channels (Top 4 Videos)
+              </button>
+              <button class="glass-btn" onclick="toggleAddChannelForm()">
+                + Add Channel Link
+              </button>
+            </div>
+          </div>
+
+          <!-- Add Channel Form (Collapsible) -->
+          <div id="addChannelForm" style="display: none; background: var(--glass-card); border: 1px solid var(--glass-border-strong); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Add YouTube Channel Link</div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <input type="text" id="newChannelUrl" class="input-box" placeholder="e.g. https://www.youtube.com/@channel/videos">
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="newChannelName" class="input-box" placeholder="Custom Name (optional, auto-detected from YouTube)" style="flex: 1; min-width: 220px;">
+                <button class="glass-btn btn-primary" style="padding: 10px 22px;" onclick="submitNewChannel()">Save Channel</button>
+                <button class="glass-btn" onclick="toggleAddChannelForm()">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Channel Cards Grid -->
+          <div class="channel-cards-grid" id="channelsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+            <!-- Dynamically populated from /api/channels -->
+          </div>
+        </div>
+
+        <div style="margin-top: 32px;">
+          <div class="panel-header" style="margin-bottom: 12px;">
+            <h2>Active Downloads & Task Status</h2>
+          </div>
+          <div class="tasks-list" id="ytTasksList">
+            <div style="font-size: 13px; color: var(--text-muted);">No active downloads right now.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 4: UPLOAD & MOBILE CONNECT ================= -->
+    <div id="tabUpload" class="tab-view">
+      <div class="upload-container">
+        
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h2>Add Files from Mobile or PC</h2>
+            <p>Upload videos, music, photos, or documents to store on your laptop and access anywhere on your Wi-Fi network.</p>
+          </div>
+
+          <div class="dropzone-box" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileUpload(this.files)">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            </div>
+            <h3>Drop your files here</h3>
+            <p>Or tap anywhere to browse files, select multiple photos, or capture video directly from your phone camera.</p>
+            <button class="glass-btn btn-primary" type="button">Browse Local Files</button>
+          </div>
+
+          <div id="uploadQueueContainer" style="margin-top: 24px; display: none;">
+            <div class="presets-title">Uploading...</div>
+            <div id="uploadQueueList" class="tasks-list"></div>
+          </div>
+        </div>
+
+        <div class="qr-card">
+          <h4>Connect from Mobile</h4>
+          <p>Scan with your phone's camera to instantly open this media library and drive on your device!</p>
+          <div class="qr-wrapper" id="qrcode"></div>
+          <div class="qr-url-badge" id="qrUrlBadge">http://...</div>
+          <button class="glass-btn" style="margin-top: 14px; width: 100%;" onclick="copyAccessUrl()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Phone Link
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= VIDEO PLAYER MODAL ================= -->
+  <div class="video-modal" id="videoModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalVideoTitle">Playing Video</div>
+        <button class="modal-close-btn" onclick="closeVideoModal()">✕</button>
+      </div>
+      <div class="player-video-wrapper">
+        <video id="glassVideoPlayer" controls playsinline preload="metadata">
+          Your browser does not support HTML5 video streaming.
+        </video>
+      </div>
+      <div class="modal-footer">
+        <span id="modalVideoMeta" style="font-size: 13px; color: var(--text-secondary);">-- MB</span>
+        <a id="modalDownloadBtn" class="glass-btn btn-primary" href="#" download>
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download to Device
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= REMOTE PC POWER MODAL ================= -->
+  <div class="power-modal" id="powerModal" onclick="closePowerModalOnBackdrop(event)">
+    <div class="power-sheet">
+      <div class="power-icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+      </div>
+      <h3>Remote PC Power Control</h3>
+      <p>Control your laptop power state from your phone or browser.</p>
+
+      <!-- Active Timer Countdown -->
+      <div class="countdown-timer-box" id="shutdownCountdownBox">
+        <span>Shutdown in progress:</span>
+        <strong id="countdownSeconds">30s</strong>
+        <button class="glass-btn" style="margin-top: 10px; width: 100%; border-color: var(--apple-red);" onclick="cancelShutdown()">
+          🛑 Cancel Shutdown
+        </button>
+      </div>
+
+      <div class="power-actions-grid" id="powerActionsGrid">
+        <button class="power-card-btn danger-shutdown" onclick="triggerPcShutdown(30)">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+          Safe Shutdown (30s)
+        </button>
+
+        <button class="power-card-btn danger-shutdown" onclick="triggerPcShutdown(0)">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Instant Shutdown
+        </button>
+
+        <button class="power-card-btn" onclick="triggerPcRestart(15)">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Restart PC
+        </button>
+
+        <button class="power-card-btn" onclick="triggerPcSleep()">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Sleep / Standby
+        </button>
+
+        <button class="power-card-btn" onclick="triggerPcLock()">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Lock PC
+        </button>
+
+        <button class="power-card-btn" onclick="cancelShutdown()">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Cancel Pending
+        </button>
+      </div>
+
+      <button class="glass-btn" style="width: 100%; margin-top: 10px;" onclick="closePowerModal()">Close Menu</button>
+    </div>
+  </div>
+
+  <!-- ================= FLOATING GLASS AUDIO PLAYER DOCK ================= -->
+  <div class="audio-player-dock" id="audioDock">
+    <div class="audio-album-art" id="audioArt">
+      <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    </div>
+    <div class="audio-info">
+      <div class="audio-track-title" id="audioTitle">No Track Selected</div>
+      <div class="audio-track-time" id="audioTime">00:00 / 00:00</div>
+    </div>
+    <div class="audio-controls">
+      <button class="audio-btn audio-play-btn" onclick="toggleAudioPlayback()">
+        <svg id="audioPlayIcon" width="16" height="16" fill="white" viewBox="0 0 24 24"><polygon points="6 4 19 12 6 20 6 4"/></svg>
+      </button>
+      <button class="audio-btn" onclick="closeAudioDock()" title="Close Player">✕</button>
+    </div>
+    <audio id="globalAudioPlayer" preload="none"></audio>
+  </div>
+
+  <!-- Toast Notification Bar -->
+  <div class="toast-msg" id="toastMsg">
+    <svg width="18" height="18" fill="none" stroke="var(--apple-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toastText">Notification message</span>
+  </div>
+
+  <script>
+    let currentServerIp = "localhost";
+    let fullAccessUrl = "http://localhost:8000";
+    let selectedQuality = "720";
+    let activeDriveCategory = "";
+    let cachedFiles = [];
+    let qrGenerated = false;
+    let shutdownCountdownInterval = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchSystemInfo();
+      fetchFiles();
+      fetchChannels();
+      initDragAndDrop();
+      initAudioPlayer();
+      initTheme();
+
+      setInterval(pollHardwareMetrics, 3000);
+      setInterval(pollYoutubeTasks, 3000);
+    });
+
+    // --- Channel Subscriptions & Sync ---
+    async function fetchChannels() {
+      try {
+        const res = await fetch("/api/channels");
+        const data = await res.json();
+        renderChannels(data.channels || []);
+      } catch (err) {
+        console.error("Failed to load channels:", err);
+      }
+    }
+
+    function renderChannels(channels) {
+      const grid = document.getElementById("channelsGrid");
+      if (!grid) return;
+      if (!channels || channels.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; font-size: 13.5px; color: var(--text-muted); padding: 14px 0;">No tracked channels yet. Click "+ Add Channel Link" to add your favorite channel!</div>`;
+        return;
+      }
+
+      grid.innerHTML = channels.map(ch => `
+        <div style="background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(255, 69, 58, 0.15); display: flex; align-items: center; justify-content: center; color: var(--apple-red); font-weight: 800; font-size: 15px; flex-shrink: 0;">
+              ▶
+            </div>
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-size: 14.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ch.name}">${ch.name}</div>
+              <a href="${ch.url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: var(--apple-blue); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${ch.url}</a>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--glass-border);">
+            <button class="glass-btn btn-primary" style="padding: 6px 14px; font-size: 12px;" onclick="syncSingleChannel('${ch.id}', '${encodeURIComponent(ch.name)}')">
+              ⚡ Sync Recent 4
+            </button>
+            <button class="icon-action-btn delete-btn" onclick="removeChannel('${ch.id}', '${encodeURIComponent(ch.name)}')" title="Remove Channel">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleAddChannelForm() {
+      const form = document.getElementById("addChannelForm");
+      if (!form) return;
+      form.style.display = (form.style.display === "none" || !form.style.display) ? "block" : "none";
+    }
+
+    async function submitNewChannel() {
+      const url = document.getElementById("newChannelUrl").value.trim();
+      const name = document.getElementById("newChannelName").value.trim();
+      if (!url) {
+        showToast("Please enter a channel URL");
+        return;
+      }
+
+      showToast("Adding channel link...");
+      const fd = new FormData();
+      fd.append("url", url);
+      if (name) fd.append("name", name);
+
+      try {
+        const res = await fetch("/api/channels", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || "Channel added successfully!");
+          document.getElementById("newChannelUrl").value = "";
+          document.getElementById("newChannelName").value = "";
+          toggleAddChannelForm();
+          fetchChannels();
+        } else {
+          showToast(data.detail || "Failed to add channel");
+        }
+      } catch (err) {
+        showToast("Network error adding channel");
+      }
+    }
+
+    async function removeChannel(id, encodedName) {
+      const name = decodeURIComponent(encodedName);
+      if (!confirm(`Stop tracking channel "${name}"?`)) return;
+      try {
+        const res = await fetch(`/api/channels/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`Removed "${name}"`);
+          fetchChannels();
+        } else {
+          showToast(data.detail || "Error removing channel");
+        }
+      } catch (err) {
+        showToast("Network error removing channel");
+      }
+    }
+
+    async function syncSingleChannel(id, encodedName) {
+      const name = decodeURIComponent(encodedName);
+      showToast(`Initiating sync for ${name}...`);
+      const fd = new FormData();
+      fd.append("channel_id", id);
+      fd.append("limit", "4");
+      fd.append("quality", selectedQuality);
+
+      try {
+        const res = await fetch("/api/channels/sync", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`Downloading recent 4 videos from ${name}!`);
+          pollYoutubeTasks();
+        } else {
+          showToast(data.detail || "Sync failed to start");
+        }
+      } catch (err) {
+        showToast("Error requesting channel sync");
+      }
+    }
+
+    async function syncAllChannels(limit = 4) {
+      showToast(`Starting download of recent ${limit} videos from subscribed channels...`);
+      const fd = new FormData();
+      fd.append("limit", limit.toString());
+      fd.append("quality", selectedQuality);
+
+      try {
+        const res = await fetch("/api/channels/sync", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || `Started downloading top ${limit} videos!`);
+          pollYoutubeTasks();
+        } else {
+          showToast(data.detail || "Sync failed");
+        }
+      } catch (err) {
+        showToast("Network error triggering channel sync");
+      }
+    }
+
+    // --- Tab Switching ---
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-view").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+
+      if (tabId === 'videos') {
+        document.getElementById('tabVideos').classList.add('active');
+        document.querySelectorAll('.nav-item')[0].classList.add('active');
+        fetchFiles('videos');
+      } else if (tabId === 'drive') {
+        document.getElementById('tabDrive').classList.add('active');
+        document.querySelectorAll('.nav-item')[1].classList.add('active');
+        fetchFiles();
+      } else if (tabId === 'scraper') {
+        document.getElementById('tabScraper').classList.add('active');
+        document.querySelectorAll('.nav-item')[2].classList.add('active');
+        pollYoutubeTasks();
+      } else if (tabId === 'upload') {
+        document.getElementById('tabUpload').classList.add('active');
+        document.querySelectorAll('.nav-item')[3].classList.add('active');
+      }
+    }
+
+    // --- System Info & Hardware Metrics ---
+    async function fetchSystemInfo() {
+      try {
+        const res = await fetch("/api/info");
+        const data = await res.json();
+        
+        currentServerIp = data.local_ip;
+        fullAccessUrl = data.access_url;
+
+        document.getElementById("ipText").textContent = `Wi-Fi: ${data.local_ip}:8000`;
+        document.getElementById("qrUrlBadge").textContent = fullAccessUrl;
+
+        const s = data.storage;
+        document.getElementById("storageRatio").textContent = `${s.used_gb} GB / ${s.total_gb} GB (${s.used_percent}%)`;
+        document.getElementById("storageProgressBar").style.width = `${s.used_percent}%`;
+
+        document.getElementById("statVideos").textContent = data.counts.videos || 0;
+        document.getElementById("statAudio").textContent = data.counts.audio || 0;
+        document.getElementById("statPhotos").textContent = data.counts.photos || 0;
+        document.getElementById("statDocs").textContent = data.counts.documents || 0;
+        document.getElementById("statFiles").textContent = data.counts.files || 0;
+
+        renderMetrics(data.metrics);
+
+        if (!qrGenerated && window.QRCode) {
+          const qrContainer = document.getElementById("qrcode");
+          qrContainer.innerHTML = "";
+          new QRCode(qrContainer, {
+            text: fullAccessUrl,
+            width: 170,
+            height: 170,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          qrGenerated = true;
+        }
+      } catch (err) {
+        console.error("Failed to fetch system info:", err);
+      }
+    }
+
+    async function pollHardwareMetrics() {
+      try {
+        const res = await fetch("/api/metrics");
+        const metrics = await res.json();
+        renderMetrics(metrics);
+      } catch (err) {}
+    }
+
+    function renderMetrics(m) {
+      if (!m) return;
+      document.getElementById("metricCpu").textContent = `${m.cpu_percent}%`;
+      document.getElementById("metricRam").textContent = `${m.ram_used_gb} / ${m.ram_total_gb} GB (${m.ram_percent}%)`;
+      document.getElementById("metricUptime").textContent = m.uptime || '--';
+
+      const batBox = document.getElementById("batteryMetricBox");
+      if (m.battery) {
+        batBox.style.display = "flex";
+        document.getElementById("metricBattery").textContent = `${m.battery.percent}% ${m.battery.power_plugged ? '⚡ Plugged' : '🔋'}`;
+      } else {
+        batBox.style.display = "none";
+      }
+    }
+
+    // --- Remote PC Power Controls ---
+    function openPowerModal() {
+      document.getElementById("powerModal").classList.add("active");
+    }
+    function closePowerModal() {
+      document.getElementById("powerModal").classList.remove("active");
+    }
+    function closePowerModalOnBackdrop(e) {
+      if (e.target.id === "powerModal") closePowerModal();
+    }
+
+    async function triggerPcShutdown(delay = 30) {
+      const confirmMsg = delay === 0 
+        ? "Warning: PC will shut down IMMEDIATELY. Unsaved work will be lost. Proceed?" 
+        : `Shut down PC in ${delay} seconds? (You can cancel it before timer ends)`;
+      if (!confirm(confirmMsg)) return;
+
+      const fd = new FormData();
+      fd.append("delay", delay);
+
+      try {
+        const res = await fetch("/api/power/shutdown", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`PC Shutdown started (${delay}s)!`);
+          if (delay > 0) startShutdownCountdown(delay);
+        } else {
+          showToast(data.detail || "Shutdown failed");
+        }
+      } catch (err) {
+        showToast("Network error executing shutdown");
+      }
+    }
+
+    async function triggerPcRestart(delay = 15) {
+      if (!confirm(`Restart PC in ${delay} seconds?`)) return;
+      const fd = new FormData();
+      fd.append("delay", delay);
+
+      try {
+        const res = await fetch("/api/power/restart", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`PC Restart started (${delay}s)!`);
+          startShutdownCountdown(delay);
+        }
+      } catch (err) {
+        showToast("Error requesting restart");
+      }
+    }
+
+    async function cancelShutdown() {
+      try {
+        const res = await fetch("/api/power/cancel", { method: "POST" });
+        const data = await res.json();
+        clearInterval(shutdownCountdownInterval);
+        document.getElementById("shutdownCountdownBox").style.display = "none";
+        showToast(data.message || "Shutdown canceled!");
+      } catch (err) {
+        showToast("Error canceling shutdown");
+      }
+    }
+
+    async function triggerPcLock() {
+      try {
+        await fetch("/api/power/lock", { method: "POST" });
+        showToast("PC Screen Locked");
+        closePowerModal();
+      } catch (err) {
+        showToast("Error locking PC");
+      }
+    }
+
+    async function triggerPcSleep() {
+      if (!confirm("Put PC to sleep?")) return;
+      try {
+        await fetch("/api/power/sleep", { method: "POST" });
+        showToast("PC entering sleep mode...");
+        closePowerModal();
+      } catch (err) {
+        showToast("Error putting PC to sleep");
+      }
+    }
+
+    function startShutdownCountdown(seconds) {
+      clearInterval(shutdownCountdownInterval);
+      let remaining = seconds;
+      const box = document.getElementById("shutdownCountdownBox");
+      const num = document.getElementById("countdownSeconds");
+      box.style.display = "block";
+      num.textContent = `${remaining}s`;
+
+      shutdownCountdownInterval = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(shutdownCountdownInterval);
+          num.textContent = "Shutting down now...";
+        } else {
+          num.textContent = `${remaining}s`;
+        }
+      }, 1000);
+    }
+
+    // --- Audio Floating Player ---
+    function initAudioPlayer() {
+      const audio = document.getElementById("globalAudioPlayer");
+      audio.addEventListener("timeupdate", () => {
+        const cur = formatTime(audio.currentTime);
+        const dur = formatTime(audio.duration || 0);
+        document.getElementById("audioTime").textContent = `${cur} / ${dur}`;
+      });
+      audio.addEventListener("play", () => {
+        document.getElementById("audioArt").classList.add("playing");
+        document.getElementById("audioPlayIcon").innerHTML = `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`;
+      });
+      audio.addEventListener("pause", () => {
+        document.getElementById("audioArt").classList.remove("playing");
+        document.getElementById("audioPlayIcon").innerHTML = `<polygon points="6 4 19 12 6 20 6 4"/>`;
+      });
+    }
+
+    function playAudioTrack(streamUrl, title) {
+      const dock = document.getElementById("audioDock");
+      const audio = document.getElementById("globalAudioPlayer");
+      document.getElementById("audioTitle").textContent = title;
+      audio.src = streamUrl;
+      dock.classList.add("active");
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    }
+
+    function toggleAudioPlayback() {
+      const audio = document.getElementById("globalAudioPlayer");
+      if (audio.paused) audio.play();
+      else audio.pause();
+    }
+
+    function closeAudioDock() {
+      const audio = document.getElementById("globalAudioPlayer");
+      audio.pause();
+      audio.src = "";
+      document.getElementById("audioDock").classList.remove("active");
+    }
+
+    function formatTime(sec) {
+      if (isNaN(sec)) return "00:00";
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // --- Files Fetching & Rendering ---
+    async function fetchFiles(categoryFilter = "") {
+      try {
+        let url = "/api/files";
+        if (categoryFilter) url += `?category=${categoryFilter}`;
+        
+        const res = await fetch(url);
+        const data = await res.json();
+        cachedFiles = data.files;
+
+        renderVideoGrid(cachedFiles.filter(f => f.category === 'videos'));
+        renderDriveFiles(cachedFiles);
+      } catch (err) {
+        console.error("Error listing files:", err);
+      }
+    }
+
+    function renderVideoGrid(videos) {
+      const grid = document.getElementById("videoGrid");
+      if (!videos || videos.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+            <div style="font-size: 40px; margin-bottom: 12px;">🎬</div>
+            <h3 style="font-size: 18px; margin-bottom: 6px;">No Videos Found</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 16px;">
+              Download a video from YouTube or upload an MP4/MKV from your phone to start streaming.
+            </p>
+            <button class="glass-btn btn-primary" onclick="switchTab('scraper')">Go to YouTube Downloader</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = videos.map(vid => {
+        const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
+        return `
+          <div class="media-card">
+            <div class="card-thumb-container" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}')">
+              <img class="card-thumb" src="${thumb}" alt="${vid.title}" loading="lazy">
+              <div class="card-play-overlay">
+                <div class="play-circle">
+                  <svg viewBox="0 0 24 24"><polygon points="6 4 19 12 6 20 6 4"/></svg>
+                </div>
+              </div>
+              <span class="badge-category">${vid.extension.replace('.', '')}</span>
+              ${vid.duration ? `<span class="badge-duration">${formatDuration(vid.duration)}</span>` : ''}
+            </div>
+
+            <div class="card-body">
+              <div class="card-title" title="${vid.title}">${vid.title}</div>
+              <div class="card-meta">
+                <span>${vid.size_formatted} • ${vid.modified_date.split(' ')[0]}</span>
+                <div class="card-actions">
+                  <a class="icon-action-btn" href="${vid.download_url}" download title="Download to device">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  </a>
+                  <button class="icon-action-btn delete-btn" onclick="deleteFile('${vid.category}', '${vid.filename}')" title="Delete">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDriveFiles(files) {
+      const container = document.getElementById("driveFilesContainer");
+      let filtered = files;
+      if (activeDriveCategory) {
+        filtered = filtered.filter(f => f.category === activeDriveCategory);
+      }
+
+      if (!filtered || filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 48px 20px;">
+            <div style="font-size: 36px; margin-bottom: 8px;">📂</div>
+            <p style="font-size: 14px; color: var(--text-secondary);">No files in this category yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(f => {
+        let iconType = f.category;
+        return `
+          <div class="file-row">
+            <div class="file-leading">
+              <div class="file-type-icon icon-${iconType}">
+                ${getCategoryIconSVG(iconType)}
+              </div>
+              <div class="file-details">
+                <div class="file-name" title="${f.filename}">${f.title || f.filename}</div>
+                <div class="file-submeta">${f.size_formatted} • Modified ${f.modified_date}</div>
+              </div>
+            </div>
+
+            <div class="file-trailing">
+              ${f.category === 'videos' ? `
+                <button class="glass-btn" style="padding: 6px 14px; font-size: 12px;" onclick="openVideoPlayer('${f.stream_url}', '${encodeURIComponent(f.title)}', '${f.size_formatted}', '${f.download_url}')">
+                  ▶ Watch
+                </button>
+              ` : f.category === 'audio' ? `
+                <button class="glass-btn" style="padding: 6px 14px; font-size: 12px;" onclick="playAudioTrack('${f.stream_url}', '${f.title.replace(/'/g, "\\'")}')">
+                  🎵 Play
+                </button>
+              ` : f.category === 'photos' ? `
+                <a class="glass-btn" style="padding: 6px 14px; font-size: 12px;" href="${f.stream_url}" target="_blank">
+                  👁 View
+                </a>
+              ` : ''}
+
+              <a class="icon-action-btn" href="${f.download_url}" download title="Download">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+
+              <button class="icon-action-btn delete-btn" onclick="deleteFile('${f.category}', '${f.filename}')" title="Delete">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getCategoryIconSVG(cat) {
+      if (cat === 'videos') return `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+      if (cat === 'audio') return `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
+      if (cat === 'photos') return `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+      if (cat === 'documents') return `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
+      return `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`;
+    }
+
+    function formatDuration(sec) {
+      if (!sec) return '';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function handleVideoSearch() {
+      const q = document.getElementById("videoSearchInput").value.toLowerCase();
+      const filtered = cachedFiles.filter(f => f.category === 'videos' && (f.title.toLowerCase().includes(q) || f.filename.toLowerCase().includes(q)));
+      renderVideoGrid(filtered);
+    }
+
+    function handleDriveSearch() {
+      const q = document.getElementById("driveSearchInput").value.toLowerCase();
+      const filtered = cachedFiles.filter(f => f.title.toLowerCase().includes(q) || f.filename.toLowerCase().includes(q));
+      renderDriveFiles(filtered);
+    }
+
+    function setDriveCategory(cat, btn) {
+      activeDriveCategory = cat;
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderDriveFiles(cachedFiles);
+    }
+
+    async function deleteFile(category, filename) {
+      if (!confirm(`Are you sure you want to delete "${filename}"?`)) return;
+      try {
+        const res = await fetch(`/api/files/${category}/${encodeURIComponent(filename)}`, { method: "DELETE" });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`Deleted ${filename}`);
+          fetchFiles();
+          fetchSystemInfo();
+        } else {
+          showToast(data.detail || "Failed to delete file");
+        }
+      } catch (err) {
+        showToast("Error deleting file");
+      }
+    }
+
+    // --- Video Modal Controls ---
+    function openVideoPlayer(streamUrl, encodedTitle, sizeFormatted, downloadUrl) {
+      const modal = document.getElementById("videoModal");
+      const video = document.getElementById("glassVideoPlayer");
+      const titleEl = document.getElementById("modalVideoTitle");
+      const metaEl = document.getElementById("modalVideoMeta");
+      const dlBtn = document.getElementById("modalDownloadBtn");
+
+      const title = decodeURIComponent(encodedTitle);
+      titleEl.textContent = title;
+      metaEl.textContent = sizeFormatted;
+      dlBtn.href = downloadUrl;
+
+      video.src = streamUrl;
+      modal.classList.add("active");
+      video.play().catch(e => console.log("Autoplay blocked:", e));
+    }
+
+    function closeVideoModal() {
+      const modal = document.getElementById("videoModal");
+      const video = document.getElementById("glassVideoPlayer");
+      video.pause();
+      video.src = "";
+      modal.classList.remove("active");
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === "videoModal") closeVideoModal();
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeVideoModal();
+        closePowerModal();
+      }
+    });
+
+    // --- YouTube Downloader Execution ---
+    function setQuality(q, btn) {
+      selectedQuality = q;
+      document.querySelectorAll(".quality-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function quickFillScrape(url) {
+      document.getElementById("ytUrlInput").value = url;
+      showToast("Preset loaded! Click 'Download Now'");
+    }
+
+    async function startYoutubeScrape() {
+      const url = document.getElementById("ytUrlInput").value.trim();
+      const limit = document.getElementById("ytLimitInput").value || 3;
+      if (!url) {
+        showToast("Please enter a YouTube video or channel URL");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("url", url);
+      formData.append("quality", selectedQuality);
+      formData.append("limit", limit);
+
+      try {
+        const res = await fetch("/api/youtube/scrape", { method: "POST", body: formData });
+        const data = await res.json();
+        if (res.ok) {
+          showToast("Download started in background!");
+          document.getElementById("ytUrlInput").value = "";
+          pollYoutubeTasks();
+        } else {
+          showToast(data.detail || "Download failed to initiate");
+        }
+      } catch (err) {
+        showToast("Network error starting download");
+      }
+    }
+
+    async function pollYoutubeTasks() {
+      try {
+        const res = await fetch("/api/youtube/tasks");
+        const data = await res.json();
+        const tasks = data.tasks || [];
+        const container = document.getElementById("ytTasksList");
+
+        if (tasks.length === 0) {
+          container.innerHTML = `<div style="font-size: 13px; color: var(--text-muted);">No active downloads right now.</div>`;
+          return;
+        }
+
+        let hasCompleted = tasks.some(t => t.status === 'completed');
+
+        container.innerHTML = tasks.slice(-6).reverse().map(t => {
+          let badgeClass = `badge-${t.status}`;
+          return `
+            <div class="task-card">
+              <div class="task-header">
+                <span style="max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.url}</span>
+                <span class="task-status-badge ${badgeClass}">${t.status}</span>
+              </div>
+              <div class="task-progress-bar">
+                <div class="task-progress-fill" style="width: ${t.progress || 0}%"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
+                <span>${t.message || ''}</span>
+                <span>${t.progress ? t.progress + '%' : ''} ${t.speed ? '• ' + t.speed : ''}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (hasCompleted) {
+          fetchFiles();
+          fetchSystemInfo();
+        }
+      } catch (err) {}
+    }
+
+    // --- File Upload & Drag & Drop ---
+    function initDragAndDrop() {
+      const dropzone = document.getElementById("dropzone");
+      ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropzone.classList.add("drag-over");
+        }, false);
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("drag-over");
+        }, false);
+      });
+      dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        handleFileUpload(dt.files);
+      });
+    }
+
+    async function handleFileUpload(files) {
+      if (!files || files.length === 0) return;
+
+      const queueContainer = document.getElementById("uploadQueueContainer");
+      const queueList = document.getElementById("uploadQueueList");
+      queueContainer.style.display = "block";
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+
+      const queueItem = document.createElement("div");
+      queueItem.className = "task-card";
+      queueItem.innerHTML = `
+        <div class="task-header">
+          <span>Uploading ${files.length} file(s)...</span>
+          <span class="task-status-badge badge-downloading">Sending</span>
+        </div>
+        <div class="task-progress-bar">
+          <div class="task-progress-fill" style="width: 50%;"></div>
+        </div>
+      `;
+      queueList.prepend(queueItem);
+
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (res.ok) {
+          queueItem.querySelector(".task-header span:last-child").className = "task-status-badge badge-completed";
+          queueItem.querySelector(".task-header span:last-child").textContent = "Completed";
+          queueItem.querySelector(".task-progress-fill").style.width = "100%";
+          showToast(`Successfully uploaded ${files.length} file(s)!`);
+          fetchFiles();
+          fetchSystemInfo();
+        } else {
+          queueItem.querySelector(".task-header span:last-child").className = "task-status-badge badge-error";
+          queueItem.querySelector(".task-header span:last-child").textContent = "Failed";
+          showToast(data.detail || "Upload error");
+        }
+      } catch (err) {
+        showToast("Network upload error");
+      }
+    }
+
+    // --- Theme & Clipboard Utilities ---
+    function initTheme() {
+      const saved = localStorage.getItem("jarvis_theme") || "dark";
+      document.documentElement.setAttribute("data-theme", saved);
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("jarvis_theme", next);
+      showToast(`Switched to Apple ${next === 'dark' ? 'Dark' : 'Light Frost'} Mode`);
+    }
+
+    function copyAccessUrl() {
+      navigator.clipboard.writeText(fullAccessUrl).then(() => {
+        showToast(`Copied ${fullAccessUrl} to clipboard!`);
+      }).catch(() => {
+        prompt("Copy mobile URL:", fullAccessUrl);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toastMsg");
+      const text = document.getElementById("toastText");
+      text.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Environment files
+.env
+.env.local
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Large media downloads & cached binaries (Keep repo lightweight and within GitHub 100MB limits)
+storage/videos/*.mp4
+storage/videos/*.mkv
+storage/videos/*.webm
+storage/videos/*.mov
+storage/videos/*.avi
+storage/videos/*.part
+storage/videos/*.webp
+storage/videos/*.jpg
+storage/videos/*.png
+storage/audio/*.mp3
+storage/audio/*.wav
+storage/audio/*.flac
+storage/audio/*.m4a
+storage/photos/*.*
+storage/files/*.zip
+storage/files/*.tar*
+storage/files/*.rar
+storage/thumbnails/*.jpg
+storage/thumbnails/*.png
+
+# Do NOT ignore .gitkeep files in storage folders
+!storage/**/.gitkeep
+
+# IDEs & OS
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
