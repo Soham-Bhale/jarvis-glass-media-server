@@ -11,45 +11,45 @@
   <style>
     :root {
       --font-main: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-      --bg-dark: #040d0c;
-      --glass-bg: rgba(9, 23, 22, 0.88);
-      --glass-card: rgba(14, 34, 32, 0.72);
-      --glass-card-hover: rgba(20, 48, 45, 0.88);
-      --glass-border: rgba(0, 229, 201, 0.12);
-      --glass-border-strong: rgba(0, 229, 201, 0.28);
+      --bg-dark: #030a09;
+      --glass-bg: rgba(9, 32, 28, 0.94);
+      --glass-card: rgba(14, 46, 42, 0.88);
+      --glass-card-hover: rgba(20, 62, 56, 0.96);
+      --glass-border: rgba(0, 229, 201, 0.32);
+      --glass-border-strong: rgba(0, 229, 201, 0.55);
       --text-primary: #ffffff;
-      --text-secondary: #7fa6a1;
-      --text-muted: #4e736e;
+      --text-secondary: #8ab6b1;
+      --text-muted: #57807a;
       --accent-cyan: #00E5C9;
       --accent-teal: #008B7A;
       --accent-mint: #38ef7d;
       --accent-grad: linear-gradient(135deg, #00E5C9 0%, #008B7A 100%);
-      --hero-grad: linear-gradient(145deg, #01433c 0%, #002824 100%);
+      --hero-grad: linear-gradient(145deg, #014c44 0%, #002824 100%);
       --power-red: #FF453A;
       --radius-sm: 12px;
       --radius-md: 18px;
       --radius-lg: 24px;
       --radius-xl: 32px;
       --radius-pill: 9999px;
-      --blur-val: blur(28px) saturate(200%);
-      --shadow-glass: 0 20px 50px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(0, 229, 201, 0.15);
-      --shadow-hero: 0 20px 40px -10px rgba(0, 229, 201, 0.22), inset 0 1px 0 0 rgba(0, 229, 201, 0.35);
+      --blur-val: blur(40px) saturate(240%);
+      --shadow-glass: 0 24px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1.5px 0 0 rgba(0, 229, 201, 0.45), 0 0 35px rgba(0, 229, 201, 0.16);
+      --shadow-hero: 0 24px 50px -10px rgba(0, 229, 201, 0.35), inset 0 1.5px 0 0 rgba(0, 229, 201, 0.6), 0 0 40px rgba(0, 229, 201, 0.22);
       --trans-spring: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     [data-theme="light"] {
       --bg-dark: #e8f3f1;
-      --glass-bg: rgba(255, 255, 255, 0.85);
-      --glass-card: rgba(255, 255, 255, 0.9);
+      --glass-bg: rgba(255, 255, 255, 0.94);
+      --glass-card: rgba(255, 255, 255, 0.96);
       --glass-card-hover: rgba(255, 255, 255, 1);
-      --glass-border: rgba(0, 139, 122, 0.15);
-      --glass-border-strong: rgba(0, 139, 122, 0.3);
+      --glass-border: rgba(0, 139, 122, 0.25);
+      --glass-border-strong: rgba(0, 139, 122, 0.45);
       --text-primary: #0a1f1c;
-      --text-secondary: #4a6864;
-      --text-muted: #7d9692;
+      --text-secondary: #3b5753;
+      --text-muted: #6e8a86;
       --hero-grad: linear-gradient(145deg, #008b7a 0%, #005a4f 100%);
-      --shadow-glass: 0 16px 40px -10px rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
-      --shadow-hero: 0 16px 36px -10px rgba(0, 139, 122, 0.3);
+      --shadow-glass: 0 20px 45px -10px rgba(0, 0, 0, 0.12), inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95);
+      --shadow-hero: 0 20px 40px -10px rgba(0, 139, 122, 0.35);
     }
 
     * {
@@ -86,14 +86,14 @@
     .orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.28;
+      filter: blur(100px);
+      opacity: 0.52;
       animation: floatOrb 22s infinite alternate ease-in-out;
     }
-    .orb-1 { width: 550px; height: 550px; background: #00E5C9; top: -140px; left: -100px; animation-duration: 24s; }
-    .orb-2 { width: 650px; height: 650px; background: #008B7A; bottom: -200px; right: -150px; animation-duration: 28s; }
-    .orb-3 { width: 450px; height: 450px; background: #02433d; top: 30%; left: 35%; opacity: 0.35; animation-duration: 32s; }
-    .orb-4 { width: 380px; height: 380px; background: #38ef7d; bottom: 15%; left: -60px; opacity: 0.16; animation-duration: 20s; }
+    .orb-1 { width: 580px; height: 580px; background: #00E5C9; top: -120px; left: -80px; animation-duration: 24s; }
+    .orb-2 { width: 680px; height: 680px; background: #008B7A; bottom: -180px; right: -120px; opacity: 0.46; animation-duration: 28s; }
+    .orb-3 { width: 480px; height: 480px; background: #025c53; top: 28%; left: 32%; opacity: 0.42; animation-duration: 32s; }
+    .orb-4 { width: 420px; height: 420px; background: #38ef7d; bottom: 12%; left: -40px; opacity: 0.32; animation-duration: 20s; }
 
     @keyframes floatOrb {
       0% { transform: translate(0, 0) scale(1); }
@@ -1272,11 +1272,12 @@
       <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span id="modalVideoMeta" style="font-size: 12.5px; color: var(--text-secondary);">-- MB</span>
-          <span id="resumeStatusBadge" style="font-size: 11px; background: rgba(0, 229, 201, 0.18); color: var(--accent-cyan); padding: 2px 8px; border-radius: 999px; display: none;">Resumed</span>
+          <span id="resumeStatusBadge" style="font-size: 11px; background: rgba(0, 229, 201, 0.25); color: var(--accent-cyan); border: 1px solid rgba(0, 229, 201, 0.4); padding: 2px 8px; border-radius: 999px; display: none;">Resumed</span>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="glass-btn" id="modalQueueNextBtn" onclick="playNextInQueue()" style="display: none; padding: 6px 12px; font-size: 12px;">⏭️ Next</button>
-          <a id="modalDownloadBtn" class="glass-btn btn-cyan" href="#" download style="padding: 6px 14px; font-size: 12px;">Download</a>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="glass-btn" id="modalQueuePrevBtn" onclick="playPreviousVideo()" title="Previous Video / Rewind" style="padding: 7px 14px; font-size: 12.5px;">⏮️ Back</button>
+          <button class="glass-btn" id="modalQueueNextBtn" onclick="playNextVideo()" title="Next Video" style="padding: 7px 14px; font-size: 12.5px;">⏭️ Next</button>
+          <a id="modalDownloadBtn" class="glass-btn btn-cyan" href="#" download style="padding: 7px 16px; font-size: 12.5px;">Download</a>
         </div>
       </div>
     </div>
@@ -1846,21 +1847,67 @@
       video.addEventListener("ended", () => {
         syncCurrentVideoProgress();
         clearInterval(videoProgressSyncInterval);
-        if (document.getElementById("autoplayNextToggle").checked && cachedQueue && cachedQueue.length > 0) {
-          showToast("Playing next in queue...");
-          playNextInQueue();
+        if (document.getElementById("autoplayNextToggle").checked) {
+          showToast("Playing next video...");
+          playNextVideo();
         }
       });
     }
 
-    function openVideoPlayer(streamUrl, encodedTitle, sizeFormatted, downloadUrl, encodedFilename, category = "videos", resumePosition = 0) {
+    let playbackHistoryStack = [];
+
+    function playPreviousVideo() {
+      const video = document.getElementById("glassVideoPlayer");
+      // If played more than 4 seconds, rewind to start first
+      if (video && video.currentTime > 4) {
+        video.currentTime = 0;
+        showToast("Rewound to start");
+        return;
+      }
+
+      // Check playback history stack
+      if (playbackHistoryStack.length > 1) {
+        playbackHistoryStack.pop(); // remove current item
+        const prev = playbackHistoryStack.pop();
+        openVideoPlayer(prev.streamUrl, encodeURIComponent(prev.title), prev.sizeFormatted, prev.downloadUrl, encodeURIComponent(prev.filename), prev.category, 0, false);
+        showToast(`Playing: ${prev.title}`);
+        return;
+      }
+
+      // Otherwise find current video in cached video files
+      const vids = cachedFiles.filter(f => f.category === 'videos');
+      if (vids.length === 0) return;
+      const idx = vids.findIndex(v => v.filename === currentVideoMeta.filename);
+      const prevIdx = idx > 0 ? idx - 1 : vids.length - 1;
+      const prevVid = vids[prevIdx];
+      openVideoPlayer(prevVid.stream_url, encodeURIComponent(prevVid.title), prevVid.size_formatted, prevVid.download_url, encodeURIComponent(prevVid.filename), prevVid.category, 0, false);
+      showToast(`Playing: ${prevVid.title}`);
+    }
+
+    function playNextVideo() {
+      // If items exist in queue, play next in queue
+      if (cachedQueue && cachedQueue.length > 0) {
+        playNextInQueue();
+        return;
+      }
+
+      // Otherwise find current video in cached video files
+      const vids = cachedFiles.filter(f => f.category === 'videos');
+      if (vids.length === 0) return;
+      const idx = vids.findIndex(v => v.filename === currentVideoMeta.filename);
+      const nextIdx = (idx !== -1 && idx < vids.length - 1) ? idx + 1 : 0;
+      const nextVid = vids[nextIdx];
+      openVideoPlayer(nextVid.stream_url, encodeURIComponent(nextVid.title), nextVid.size_formatted, nextVid.download_url, encodeURIComponent(nextVid.filename), nextVid.category, 0, true);
+      showToast(`Playing: ${nextVid.title}`);
+    }
+
+    function openVideoPlayer(streamUrl, encodedTitle, sizeFormatted, downloadUrl, encodedFilename, category = "videos", resumePosition = 0, recordHistory = true) {
       const modal = document.getElementById("videoModal");
       const video = document.getElementById("glassVideoPlayer");
       const titleEl = document.getElementById("modalVideoTitle");
       const metaEl = document.getElementById("modalVideoMeta");
       const dlBtn = document.getElementById("modalDownloadBtn");
       const resumeBadge = document.getElementById("resumeStatusBadge");
-      const nextBtn = document.getElementById("modalQueueNextBtn");
 
       const title = decodeURIComponent(encodedTitle);
       const filename = encodedFilename ? decodeURIComponent(encodedFilename) : "";
@@ -1869,7 +1916,17 @@
       titleEl.textContent = title;
       metaEl.textContent = sizeFormatted;
       dlBtn.href = downloadUrl;
-      nextBtn.style.display = (cachedQueue && cachedQueue.length > 0) ? "inline-flex" : "none";
+
+      if (recordHistory) {
+        playbackHistoryStack.push({
+          streamUrl,
+          title,
+          sizeFormatted,
+          downloadUrl,
+          filename,
+          category
+        });
+      }
 
       video.src = streamUrl;
       modal.classList.add("active");
