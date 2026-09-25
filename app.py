@@ -34,6 +34,8 @@ THUMBNAILS_DIR = os.path.join(STORAGE_DIR, "thumbnails")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 METADATA_FILE = os.path.join(STORAGE_DIR, "metadata.json")
 CHANNELS_FILE = os.path.join(STORAGE_DIR, "channels.json")
+HISTORY_FILE = os.path.join(STORAGE_DIR, "watch_history.json")
+QUEUE_FILE = os.path.join(STORAGE_DIR, "playback_queue.json")
 
 # Ensure all storage directories exist
 for cat_path in CATEGORIES.values():
@@ -53,6 +55,32 @@ def load_channels() -> list:
 def save_channels(channels: list):
     with open(CHANNELS_FILE, "w", encoding="utf-8") as f:
         json.dump(channels, f, indent=2, ensure_ascii=False)
+
+def load_watch_history() -> dict:
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_watch_history(hist: dict):
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(hist, f, indent=2, ensure_ascii=False)
+
+def load_playback_queue() -> list:
+    if os.path.exists(QUEUE_FILE):
+        try:
+            with open(QUEUE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+def save_playback_queue(q: list):
+    with open(QUEUE_FILE, "w", encoding="utf-8") as f:
+        json.dump(q, f, indent=2, ensure_ascii=False)
 
 # Extension mappings for automatic categorization
 EXT_CATEGORIES = {
@@ -362,6 +390,7 @@ async def list_files(
     sort_by: Optional[str] = "date_desc"
 ):
     metadata = load_metadata()
+    watch_history = load_watch_history()
     results = []
 
     target_cats = [category] if category and category in CATEGORIES else list(CATEGORIES.keys())
@@ -426,6 +455,7 @@ async def list_files(
                 "youtube_id": meta_entry.get("youtube_id"),
                 "uploader": meta_entry.get("uploader"),
                 "duration": meta_entry.get("duration"),
+                "watch_progress": watch_history.get(meta_key)
             })
 
     if sort_by == "date_asc":
@@ -442,6 +472,106 @@ async def list_files(
         results.sort(key=lambda x: x["modified_timestamp"], reverse=True)
 
     return {"files": results, "total": len(results)}
+
+# --- Watch History & Continue Watching Endpoints ---
+@app.get("/api/history")
+async def get_watch_history():
+    """Returns watch history sorted by last watched timestamp descending."""
+    hist = load_watch_history()
+    items = list(hist.values())
+    items.sort(key=lambda x: x.get("last_watched", 0), reverse=True)
+    return {"history": items}
+
+@app.post("/api/history/update")
+async def update_watch_history(
+    category: str = Form("videos"),
+    filename: str = Form(...),
+    position_seconds: float = Form(...),
+    duration_seconds: float = Form(...)
+):
+    """Saves playback progress and timestamp for continue watching."""
+    hist = load_watch_history()
+    key = f"{category}/{filename}"
+    percent = round((position_seconds / duration_seconds) * 100, 1) if duration_seconds > 0 else 0
+    completed = percent >= 92.0
+
+    metadata = load_metadata().get(key, {})
+    title = metadata.get("title", filename)
+    thumb_url = f"/api/thumbnails/{filename}.jpg" if os.path.exists(os.path.join(THUMBNAILS_DIR, f"{filename}.jpg")) else metadata.get("thumbnail_url")
+
+    hist[key] = {
+        "key": key,
+        "category": category,
+        "filename": filename,
+        "title": title,
+        "thumbnail_url": thumb_url,
+        "stream_url": f"/api/stream/{category}/{filename}",
+        "download_url": f"/api/download/{category}/{filename}",
+        "position_seconds": round(position_seconds, 1),
+        "duration_seconds": round(duration_seconds, 1),
+        "percent": percent,
+        "completed": completed,
+        "last_watched": time.time(),
+        "last_watched_str": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+    save_watch_history(hist)
+    return {"status": "success", "entry": hist[key]}
+
+@app.delete("/api/history/{category}/{filename}")
+async def remove_history_item(category: str, filename: str):
+    hist = load_watch_history()
+    key = f"{category}/{filename}"
+    if key in hist:
+        del hist[key]
+        save_watch_history(hist)
+    return {"status": "success", "message": f"Removed from continue watching"}
+
+@app.delete("/api/history")
+async def clear_all_history():
+    save_watch_history({})
+    return {"status": "success", "message": "Watch history cleared"}
+
+# --- Playback Queue Endpoints ---
+@app.get("/api/queue")
+async def get_playback_queue():
+    """Returns the list of queued videos for continuous playback."""
+    return {"queue": load_playback_queue()}
+
+@app.post("/api/queue/add")
+async def add_to_playback_queue(category: str = Form("videos"), filename: str = Form(...)):
+    q = load_playback_queue()
+    key = f"{category}/{filename}"
+    if any(item.get("key") == key for item in q):
+        return {"status": "info", "message": "Video is already in queue", "queue": q}
+
+    metadata = load_metadata().get(key, {})
+    title = metadata.get("title", filename)
+    thumb_url = f"/api/thumbnails/{filename}.jpg" if os.path.exists(os.path.join(THUMBNAILS_DIR, f"{filename}.jpg")) else metadata.get("thumbnail_url")
+
+    q.append({
+        "key": key,
+        "category": category,
+        "filename": filename,
+        "title": title,
+        "thumbnail_url": thumb_url,
+        "stream_url": f"/api/stream/{category}/{filename}",
+        "download_url": f"/api/download/{category}/{filename}",
+        "added_at": datetime.now().strftime("%H:%M:%S")
+    })
+    save_playback_queue(q)
+    return {"status": "success", "message": f"Added '{title}' to queue", "queue": q}
+
+@app.post("/api/queue/remove")
+async def remove_from_playback_queue(key: str = Form(...)):
+    q = load_playback_queue()
+    q = [item for item in q if item.get("key") != key]
+    save_playback_queue(q)
+    return {"status": "success", "queue": q}
+
+@app.post("/api/queue/clear")
+async def clear_playback_queue():
+    save_playback_queue([])
+    return {"status": "success", "message": "Queue cleared"}
 
 @app.post("/api/upload")
 async def upload_files(

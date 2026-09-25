@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>JARVIS Glass Media & Drive</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,7 +70,7 @@
       overflow-x: hidden;
       position: relative;
       transition: background-color 0.4s ease;
-      padding-bottom: 90px;
+      padding-bottom: 95px;
     }
 
     /* Ambient Fluid Mesh Canvas */
@@ -481,6 +481,90 @@
       font-weight: 600;
     }
 
+    /* Continue Watching Carousel */
+    .continue-shelf-container {
+      margin-bottom: 26px;
+      display: none;
+    }
+    .continue-shelf-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .continue-shelf-scroll {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .continue-card {
+      min-width: 260px;
+      max-width: 280px;
+      scroll-snap-align: start;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-val);
+      -webkit-backdrop-filter: var(--blur-val);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform 0.25s var(--trans-spring);
+    }
+    .continue-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--glass-border-strong);
+    }
+    .continue-thumb-box {
+      width: 100%;
+      height: 140px;
+      position: relative;
+      background: #000;
+      cursor: pointer;
+    }
+    .continue-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .continue-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .continue-progress-fill {
+      height: 100%;
+      background: var(--apple-blue);
+      box-shadow: 0 0 8px var(--apple-blue);
+    }
+    .continue-card-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .continue-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .continue-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
     /* Video Cards Grid */
     .media-grid {
       display: grid;
@@ -590,6 +674,20 @@
       padding: 3px 8px;
       border-radius: 6px;
       border: 1px solid rgba(100, 210, 255, 0.25);
+    }
+    .card-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: 3;
+    }
+    .card-progress-fill {
+      height: 100%;
+      background: var(--apple-blue);
+      box-shadow: 0 0 6px var(--apple-blue);
     }
 
     .card-body {
@@ -988,7 +1086,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.88);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       z-index: 9999;
@@ -1061,10 +1159,12 @@
       align-items: center;
       justify-content: space-between;
       border-top: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     /* PC Power Sheet / Modal */
-    .power-modal {
+    .power-modal, .queue-modal {
       position: fixed;
       top: 0;
       left: 0;
@@ -1079,7 +1179,7 @@
       justify-content: center;
       padding: 24px;
     }
-    .power-modal.active {
+    .power-modal.active, .queue-modal.active {
       display: flex;
     }
     .power-sheet {
@@ -1091,6 +1191,19 @@
       padding: 28px;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 69, 58, 0.2);
       text-align: center;
+      animation: fadeInModal 0.3s ease;
+    }
+    .queue-sheet {
+      width: 100%;
+      max-width: 520px;
+      max-height: 85vh;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
       animation: fadeInModal 0.3s ease;
     }
     .power-icon-circle {
@@ -1168,6 +1281,31 @@
       color: var(--apple-red);
       display: block;
       margin-top: 4px;
+    }
+
+    /* Queue Items List */
+    .queue-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 52vh;
+      margin: 16px 0;
+      padding-right: 4px;
+    }
+    .queue-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .queue-item:hover {
+      background: var(--glass-card-hover);
     }
 
     /* Floating Apple Music Style Glass Audio Player */
@@ -1281,33 +1419,71 @@
       transform: translateY(0);
     }
 
+    /* Mobile First Responsive Overrides */
     @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(90px + env(safe-area-inset-bottom, 15px));
+      }
       .app-wrapper {
-        padding: 14px 16px 120px 16px;
+        padding: 12px 14px;
       }
       header.glass-header {
         flex-direction: column;
         align-items: flex-start;
+        padding: 14px 16px;
+        gap: 12px;
+      }
+      .header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .header-actions .badge-ip {
+        grid-column: 1 / -1;
+        justify-content: center;
       }
       .glass-nav {
         position: fixed;
-        bottom: 16px;
+        bottom: env(safe-area-inset-bottom, 12px);
         top: auto;
         left: 0;
         right: 0;
         margin-bottom: 0;
       }
       .nav-dock {
-        width: 92%;
+        width: 95%;
         max-width: 440px;
-        justify-content: space-around;
+        padding: 5px;
       }
       .nav-item {
-        padding: 8px 14px;
-        font-size: 12px;
+        padding: 7px 10px;
+        font-size: 11px;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        justify-content: center;
       }
+      .nav-item svg { width: 17px; height: 17px; }
       .audio-player-dock {
-        bottom: 80px;
+        bottom: calc(75px + env(safe-area-inset-bottom, 15px));
+      }
+      .video-modal {
+        padding: 8px;
+      }
+      .modal-content {
+        border-radius: var(--radius-lg);
+      }
+      .continue-card {
+        min-width: 210px;
+        max-width: 230px;
+      }
+      .continue-thumb-box {
+        height: 120px;
+      }
+      .media-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
     }
   </style>
@@ -1342,6 +1518,12 @@
           <span class="pulse-dot"></span>
           <span id="ipText">Loading Wi-Fi...</span>
         </div>
+
+        <!-- Playback Queue Button -->
+        <button class="glass-btn" onclick="openQueueModal()" id="queueNavBtn" title="Play Queue / Up Next">
+          <span>📋 Queue</span>
+          <span id="queueBadgeCount" style="background: var(--apple-blue); color: white; border-radius: 999px; padding: 1px 7px; font-size: 11px; font-weight: 700; margin-left: 2px;">0</span>
+        </button>
 
         <!-- Theme Toggle -->
         <button class="glass-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Dark/Light Mode">
@@ -1426,6 +1608,21 @@
 
     <!-- ================= TAB 1: VIDEOS ================= -->
     <div id="tabVideos" class="tab-view active">
+      
+      <!-- Continue Watching Shelf -->
+      <div class="continue-shelf-container" id="continueWatchingSection">
+        <div class="continue-shelf-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.01em;">Continue Watching</span>
+            <span id="continueCountBadge" style="background: rgba(255, 255, 255, 0.1); font-size: 11px; padding: 2px 8px; border-radius: 999px; color: var(--text-secondary);">0</span>
+          </div>
+          <button class="glass-btn" style="padding: 4px 10px; font-size: 11px;" onclick="clearWatchHistory()">Clear History</button>
+        </div>
+        <div class="continue-shelf-scroll" id="continueWatchingList">
+          <!-- Dynamically populated from /api/history -->
+        </div>
+      </div>
+
       <!-- Ready to Play Quick Access Header -->
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: var(--glass-card); border: 1px solid var(--glass-border); padding: 12px 18px; border-radius: var(--radius-md);">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -1494,7 +1691,7 @@
             </div>
 
             <span class="opt-label" style="margin-left: auto;">Channel Limit:</span>
-            <input type="number" id="ytLimitInput" class="input-box" value="3" min="1" max="15" style="width: 80px; padding: 8px 12px;">
+            <input type="number" id="ytLimitInput" class="input-box" value="4" min="1" max="15" style="width: 80px; padding: 8px 12px;">
 
             <button class="glass-btn btn-primary" onclick="startYoutubeScrape()" style="padding: 10px 24px;">
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1618,11 +1815,49 @@
         </video>
       </div>
       <div class="modal-footer">
-        <span id="modalVideoMeta" style="font-size: 13px; color: var(--text-secondary);">-- MB</span>
-        <a id="modalDownloadBtn" class="glass-btn btn-primary" href="#" download>
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download to Device
-        </a>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="modalVideoMeta" style="font-size: 13px; color: var(--text-secondary);">-- MB</span>
+          <span id="resumeStatusBadge" style="font-size: 11.5px; background: rgba(10, 132, 255, 0.18); color: var(--apple-blue); padding: 2px 8px; border-radius: 999px; display: none;">Resumed</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="glass-btn" id="modalQueueNextBtn" onclick="playNextInQueue()" style="display: none; padding: 7px 14px; font-size: 12px;">
+            ⏭️ Next in Queue
+          </button>
+          <a id="modalDownloadBtn" class="glass-btn btn-primary" href="#" download>
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PLAYBACK QUEUE MODAL ================= -->
+  <div class="queue-modal" id="queueModal" onclick="closeQueueModalOnBackdrop(event)">
+    <div class="queue-sheet">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3 style="font-size: 18px; font-weight: 700;">Up Next / Play Queue</h3>
+          <span id="queueSheetCount" style="background: var(--apple-blue); color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;">0</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeQueueModal()">✕</button>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px;">
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="checkbox" id="autoplayNextToggle" checked style="accent-color: var(--apple-blue);">
+          Auto-play next video
+        </label>
+        <button class="glass-btn" style="padding: 4px 10px; font-size: 11px;" onclick="clearQueue()">Clear Queue</button>
+      </div>
+
+      <div class="queue-items-list" id="queueItemsList">
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">Queue is currently empty. Click "+ Queue" on any video to add!</div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: auto;">
+        <button class="glass-btn btn-primary" style="flex: 1;" onclick="playFirstInQueue()">▶ Play Next in Queue</button>
+        <button class="glass-btn" onclick="closeQueueModal()">Close</button>
       </div>
     </div>
   </div>
@@ -1636,7 +1871,6 @@
       <h3>Remote PC Power Control</h3>
       <p>Control your laptop power state from your phone or browser.</p>
 
-      <!-- Active Timer Countdown -->
       <div class="countdown-timer-box" id="shutdownCountdownBox">
         <span>Shutdown in progress:</span>
         <strong id="countdownSeconds">30s</strong>
@@ -1711,15 +1945,24 @@
     let selectedQuality = "720";
     let activeDriveCategory = "";
     let cachedFiles = [];
+    let cachedQueue = [];
+    let cachedHistory = [];
     let qrGenerated = false;
     let shutdownCountdownInterval = null;
+
+    // Track currently playing video for position saving
+    let currentVideoMeta = { filename: "", category: "videos", lastSavedPos: 0 };
+    let videoProgressSyncInterval = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchSystemInfo();
       fetchFiles();
       fetchChannels();
+      fetchWatchHistory();
+      fetchPlaybackQueue();
       initDragAndDrop();
       initAudioPlayer();
+      initVideoPlayerEvents();
       initTheme();
 
       setInterval(pollHardwareMetrics, 3000);
@@ -1873,6 +2116,7 @@
         document.getElementById('tabVideos').classList.add('active');
         document.querySelectorAll('.nav-item')[0].classList.add('active');
         fetchFiles('videos');
+        fetchWatchHistory();
       } else if (tabId === 'drive') {
         document.getElementById('tabDrive').classList.add('active');
         document.querySelectorAll('.nav-item')[1].classList.add('active');
@@ -2055,51 +2299,199 @@
       }, 1000);
     }
 
-    // --- Audio Floating Player ---
-    function initAudioPlayer() {
-      const audio = document.getElementById("globalAudioPlayer");
-      audio.addEventListener("timeupdate", () => {
-        const cur = formatTime(audio.currentTime);
-        const dur = formatTime(audio.duration || 0);
-        document.getElementById("audioTime").textContent = `${cur} / ${dur}`;
-      });
-      audio.addEventListener("play", () => {
-        document.getElementById("audioArt").classList.add("playing");
-        document.getElementById("audioPlayIcon").innerHTML = `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`;
-      });
-      audio.addEventListener("pause", () => {
-        document.getElementById("audioArt").classList.remove("playing");
-        document.getElementById("audioPlayIcon").innerHTML = `<polygon points="6 4 19 12 6 20 6 4"/>`;
-      });
+    // --- Watch History & Continue Watching ---
+    async function fetchWatchHistory() {
+      try {
+        const res = await fetch("/api/history");
+        const data = await res.json();
+        cachedHistory = data.history || [];
+        renderContinueWatching(cachedHistory);
+      } catch (err) {
+        console.error("Error fetching watch history:", err);
+      }
     }
 
-    function playAudioTrack(streamUrl, title) {
-      const dock = document.getElementById("audioDock");
-      const audio = document.getElementById("globalAudioPlayer");
-      document.getElementById("audioTitle").textContent = title;
-      audio.src = streamUrl;
-      dock.classList.add("active");
-      audio.play().catch(e => console.log("Audio play blocked:", e));
+    function renderContinueWatching(historyList) {
+      const container = document.getElementById("continueWatchingSection");
+      const list = document.getElementById("continueWatchingList");
+      const badge = document.getElementById("continueCountBadge");
+
+      // Filter in-progress videos (>2% and <92%)
+      const inProgress = historyList.filter(item => item.percent >= 2 && !item.completed);
+
+      if (!inProgress || inProgress.length === 0) {
+        container.style.display = "none";
+        return;
+      }
+
+      container.style.display = "block";
+      badge.textContent = inProgress.length;
+
+      list.innerHTML = inProgress.map(item => {
+        const thumb = item.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
+        return `
+          <div class="continue-card">
+            <div class="continue-thumb-box" onclick="openVideoPlayer('${item.stream_url}', '${encodeURIComponent(item.title)}', '${formatDuration(item.duration_seconds)}', '${item.download_url}', '${encodeURIComponent(item.filename)}', 'videos', ${item.position_seconds})">
+              <img src="${thumb}" alt="${item.title}" loading="lazy">
+              <div class="card-play-overlay">
+                <div class="play-circle" style="width: 42px; height: 42px;">
+                  <svg viewBox="0 0 24 24"><polygon points="6 4 19 12 6 20 6 4"/></svg>
+                </div>
+              </div>
+              <div class="continue-progress-bar">
+                <div class="continue-progress-fill" style="width: ${item.percent}%"></div>
+              </div>
+            </div>
+            <div class="continue-card-body">
+              <div class="continue-title" title="${item.title}">${item.title}</div>
+              <div class="continue-meta">
+                <span>Resume at ${formatTime(item.position_seconds)} (${item.percent}%)</span>
+                <button class="icon-action-btn delete-btn" style="width: 26px; height: 26px;" onclick="removeHistoryItem('videos', '${encodeURIComponent(item.filename)}')" title="Dismiss">✕</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    function toggleAudioPlayback() {
-      const audio = document.getElementById("globalAudioPlayer");
-      if (audio.paused) audio.play();
-      else audio.pause();
+    async function removeHistoryItem(category, encodedFilename) {
+      try {
+        await fetch(`/api/history/${category}/${encodedFilename}`, { method: "DELETE" });
+        fetchWatchHistory();
+      } catch (err) {}
     }
 
-    function closeAudioDock() {
-      const audio = document.getElementById("globalAudioPlayer");
-      audio.pause();
-      audio.src = "";
-      document.getElementById("audioDock").classList.remove("active");
+    async function clearWatchHistory() {
+      if (!confirm("Clear all watch history and continue watching shelf?")) return;
+      try {
+        await fetch("/api/history", { method: "DELETE" });
+        showToast("Watch history cleared");
+        fetchWatchHistory();
+        fetchFiles();
+      } catch (err) {}
     }
 
-    function formatTime(sec) {
-      if (isNaN(sec)) return "00:00";
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    // --- Playback Queue System ---
+    async function fetchPlaybackQueue() {
+      try {
+        const res = await fetch("/api/queue");
+        const data = await res.json();
+        cachedQueue = data.queue || [];
+        updateQueueUI(cachedQueue);
+      } catch (err) {
+        console.error("Error fetching queue:", err);
+      }
+    }
+
+    function updateQueueUI(queue) {
+      document.getElementById("queueBadgeCount").textContent = queue.length;
+      document.getElementById("queueSheetCount").textContent = queue.length;
+
+      const list = document.getElementById("queueItemsList");
+      if (!queue || queue.length === 0) {
+        list.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">Queue is currently empty. Click "+ Queue" on any video to add!</div>`;
+        return;
+      }
+
+      list.innerHTML = queue.map((item, idx) => `
+        <div class="queue-item">
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--apple-blue);">${idx + 1}</span>
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);">${item.title}</div>
+              <span style="font-size: 11px; color: var(--text-secondary);">Added at ${item.added_at}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button class="glass-btn btn-primary" style="padding: 5px 12px; font-size: 11.5px;" onclick="playQueueItem('${encodeURIComponent(item.key)}')">
+              ▶ Play
+            </button>
+            <button class="icon-action-btn delete-btn" style="width: 28px; height: 28px;" onclick="removeFromQueue('${encodeURIComponent(item.key)}')">
+              ✕
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openQueueModal() {
+      fetchPlaybackQueue();
+      document.getElementById("queueModal").classList.add("active");
+    }
+    function closeQueueModal() {
+      document.getElementById("queueModal").classList.remove("active");
+    }
+    function closeQueueModalOnBackdrop(e) {
+      if (e.target.id === "queueModal") closeQueueModal();
+    }
+
+    async function addToQueue(category, encodedFilename, encodedTitle) {
+      const filename = decodeURIComponent(encodedFilename);
+      const title = decodeURIComponent(encodedTitle);
+      const fd = new FormData();
+      fd.append("category", category);
+      fd.append("filename", filename);
+
+      try {
+        const res = await fetch("/api/queue/add", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || `Added to queue!`);
+          fetchPlaybackQueue();
+        }
+      } catch (err) {
+        showToast("Error adding to queue");
+      }
+    }
+
+    async function removeFromQueue(encodedKey) {
+      const key = decodeURIComponent(encodedKey);
+      const fd = new FormData();
+      fd.append("key", key);
+      try {
+        const res = await fetch("/api/queue/remove", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok) {
+          fetchPlaybackQueue();
+        }
+      } catch (err) {}
+    }
+
+    async function clearQueue() {
+      try {
+        await fetch("/api/queue/clear", { method: "POST" });
+        showToast("Queue cleared");
+        fetchPlaybackQueue();
+      } catch (err) {}
+    }
+
+    function playFirstInQueue() {
+      if (!cachedQueue || cachedQueue.length === 0) {
+        showToast("Queue is empty!");
+        return;
+      }
+      playQueueItem(encodeURIComponent(cachedQueue[0].key));
+    }
+
+    function playQueueItem(encodedKey) {
+      const key = decodeURIComponent(encodedKey);
+      const item = cachedQueue.find(q => q.key === key);
+      if (!item) return;
+
+      closeQueueModal();
+      openVideoPlayer(item.stream_url, encodeURIComponent(item.title), "-- MB", item.download_url, encodeURIComponent(item.filename), item.category, 0);
+    }
+
+    function playNextInQueue() {
+      if (!cachedQueue || cachedQueue.length === 0) {
+        showToast("No more videos in queue.");
+        return;
+      }
+      // Remove current and play next
+      const nextItem = cachedQueue[0];
+      removeFromQueue(encodeURIComponent(nextItem.key));
+      openVideoPlayer(nextItem.stream_url, encodeURIComponent(nextItem.title), "-- MB", nextItem.download_url, encodeURIComponent(nextItem.filename), nextItem.category, 0);
     }
 
     // --- Files Fetching & Rendering ---
@@ -2137,9 +2529,13 @@
 
       grid.innerHTML = videos.map(vid => {
         const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
+        const prog = vid.watch_progress;
+        const hasProgress = prog && prog.percent > 2 && !prog.completed;
+        const resumePos = hasProgress ? prog.position_seconds : 0;
+
         return `
           <div class="media-card">
-            <div class="card-thumb-container" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}')">
+            <div class="card-thumb-container" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${vid.category}', ${resumePos})">
               <img class="card-thumb" src="${thumb}" alt="${vid.title}" loading="lazy">
               <div class="card-play-overlay">
                 <div class="play-circle">
@@ -2148,6 +2544,12 @@
               </div>
               <span class="badge-category">${vid.extension.replace('.', '')}</span>
               ${vid.duration ? `<span class="badge-duration">${formatDuration(vid.duration)}</span>` : ''}
+
+              ${hasProgress ? `
+                <div class="card-progress-bar">
+                  <div class="card-progress-fill" style="width: ${prog.percent}%"></div>
+                </div>
+              ` : ''}
             </div>
 
             <div class="card-body">
@@ -2155,6 +2557,9 @@
               <div class="card-meta">
                 <span>${vid.size_formatted} • ${vid.modified_date.split(' ')[0]}</span>
                 <div class="card-actions">
+                  <button class="icon-action-btn" onclick="addToQueue('${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}')" title="Add to Queue">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
                   <a class="icon-action-btn" href="${vid.download_url}" download title="Download to device">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   </a>
@@ -2202,8 +2607,11 @@
 
             <div class="file-trailing">
               ${f.category === 'videos' ? `
-                <button class="glass-btn" style="padding: 6px 14px; font-size: 12px;" onclick="openVideoPlayer('${f.stream_url}', '${encodeURIComponent(f.title)}', '${f.size_formatted}', '${f.download_url}')">
+                <button class="glass-btn" style="padding: 6px 14px; font-size: 12px;" onclick="openVideoPlayer('${f.stream_url}', '${encodeURIComponent(f.title)}', '${f.size_formatted}', '${f.download_url}', '${encodeURIComponent(f.filename)}', 'videos', 0)">
                   ▶ Watch
+                </button>
+                <button class="icon-action-btn" onclick="addToQueue('videos', '${encodeURIComponent(f.filename)}', '${encodeURIComponent(f.title)}')" title="Add to Queue">
+                  +Q
                 </button>
               ` : f.category === 'audio' ? `
                 <button class="glass-btn" style="padding: 6px 14px; font-size: 12px;" onclick="playAudioTrack('${f.stream_url}', '${f.title.replace(/'/g, "\\'")}')">
@@ -2270,6 +2678,7 @@
         if (res.ok) {
           showToast(`Deleted ${filename}`);
           fetchFiles();
+          fetchWatchHistory();
           fetchSystemInfo();
         } else {
           showToast(data.detail || "Failed to delete file");
@@ -2279,30 +2688,100 @@
       }
     }
 
-    // --- Video Modal Controls ---
-    function openVideoPlayer(streamUrl, encodedTitle, sizeFormatted, downloadUrl) {
+    // --- Video Player Controls & Progress Tracking ---
+    function initVideoPlayerEvents() {
+      const video = document.getElementById("glassVideoPlayer");
+
+      // Auto-save playback position every 3 seconds while playing
+      video.addEventListener("play", () => {
+        clearInterval(videoProgressSyncInterval);
+        videoProgressSyncInterval = setInterval(syncCurrentVideoProgress, 3000);
+      });
+
+      video.addEventListener("pause", () => {
+        syncCurrentVideoProgress();
+        clearInterval(videoProgressSyncInterval);
+      });
+
+      // Handle video ended -> auto play next in queue
+      video.addEventListener("ended", () => {
+        syncCurrentVideoProgress();
+        clearInterval(videoProgressSyncInterval);
+
+        const autoPlay = document.getElementById("autoplayNextToggle").checked;
+        if (autoPlay && cachedQueue && cachedQueue.length > 0) {
+          showToast("Video finished. Playing next in queue...");
+          playNextInQueue();
+        }
+      });
+    }
+
+    function openVideoPlayer(streamUrl, encodedTitle, sizeFormatted, downloadUrl, encodedFilename, category = "videos", resumePosition = 0) {
       const modal = document.getElementById("videoModal");
       const video = document.getElementById("glassVideoPlayer");
       const titleEl = document.getElementById("modalVideoTitle");
       const metaEl = document.getElementById("modalVideoMeta");
       const dlBtn = document.getElementById("modalDownloadBtn");
+      const resumeBadge = document.getElementById("resumeStatusBadge");
+      const nextBtn = document.getElementById("modalQueueNextBtn");
 
       const title = decodeURIComponent(encodedTitle);
+      const filename = encodedFilename ? decodeURIComponent(encodedFilename) : "";
+
+      currentVideoMeta = {
+        filename: filename,
+        category: category,
+        lastSavedPos: resumePosition || 0
+      };
+
       titleEl.textContent = title;
       metaEl.textContent = sizeFormatted;
       dlBtn.href = downloadUrl;
 
+      // Show/hide queue next button
+      nextBtn.style.display = (cachedQueue && cachedQueue.length > 0) ? "inline-flex" : "none";
+
       video.src = streamUrl;
       modal.classList.add("active");
+
+      // Resume position handling
+      if (resumePosition && resumePosition > 4) {
+        video.currentTime = resumePosition;
+        resumeBadge.style.display = "inline-block";
+        resumeBadge.textContent = `Resumed from ${formatTime(resumePosition)}`;
+      } else {
+        resumeBadge.style.display = "none";
+      }
+
       video.play().catch(e => console.log("Autoplay blocked:", e));
+    }
+
+    function syncCurrentVideoProgress() {
+      const video = document.getElementById("glassVideoPlayer");
+      if (!video || !currentVideoMeta.filename || isNaN(video.currentTime) || isNaN(video.duration) || video.duration === 0) {
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append("category", currentVideoMeta.category);
+      fd.append("filename", currentVideoMeta.filename);
+      fd.append("position_seconds", video.currentTime.toString());
+      fd.append("duration_seconds", video.duration.toString());
+
+      fetch("/api/history/update", { method: "POST", body: fd }).then(r => r.json()).then(data => {
+        fetchWatchHistory();
+      }).catch(err => {});
     }
 
     function closeVideoModal() {
       const modal = document.getElementById("videoModal");
       const video = document.getElementById("glassVideoPlayer");
+      syncCurrentVideoProgress();
+      clearInterval(videoProgressSyncInterval);
       video.pause();
       video.src = "";
       modal.classList.remove("active");
+      fetchWatchHistory();
     }
 
     function closeModalOnBackdrop(e) {
@@ -2313,8 +2792,56 @@
       if (e.key === "Escape") {
         closeVideoModal();
         closePowerModal();
+        closeQueueModal();
       }
     });
+
+    // --- Audio Floating Player ---
+    function initAudioPlayer() {
+      const audio = document.getElementById("globalAudioPlayer");
+      audio.addEventListener("timeupdate", () => {
+        const cur = formatTime(audio.currentTime);
+        const dur = formatTime(audio.duration || 0);
+        document.getElementById("audioTime").textContent = `${cur} / ${dur}`;
+      });
+      audio.addEventListener("play", () => {
+        document.getElementById("audioArt").classList.add("playing");
+        document.getElementById("audioPlayIcon").innerHTML = `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`;
+      });
+      audio.addEventListener("pause", () => {
+        document.getElementById("audioArt").classList.remove("playing");
+        document.getElementById("audioPlayIcon").innerHTML = `<polygon points="6 4 19 12 6 20 6 4"/>`;
+      });
+    }
+
+    function playAudioTrack(streamUrl, title) {
+      const dock = document.getElementById("audioDock");
+      const audio = document.getElementById("globalAudioPlayer");
+      document.getElementById("audioTitle").textContent = title;
+      audio.src = streamUrl;
+      dock.classList.add("active");
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    }
+
+    function toggleAudioPlayback() {
+      const audio = document.getElementById("globalAudioPlayer");
+      if (audio.paused) audio.play();
+      else audio.pause();
+    }
+
+    function closeAudioDock() {
+      const audio = document.getElementById("globalAudioPlayer");
+      audio.pause();
+      audio.src = "";
+      document.getElementById("audioDock").classList.remove("active");
+    }
+
+    function formatTime(sec) {
+      if (isNaN(sec)) return "00:00";
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
 
     // --- YouTube Downloader Execution ---
     function setQuality(q, btn) {
@@ -2330,7 +2857,7 @@
 
     async function startYoutubeScrape() {
       const url = document.getElementById("ytUrlInput").value.trim();
-      const limit = document.getElementById("ytLimitInput").value || 3;
+      const limit = document.getElementById("ytLimitInput").value || 4;
       if (!url) {
         showToast("Please enter a YouTube video or channel URL");
         return;
@@ -2391,6 +2918,7 @@
 
         if (hasCompleted) {
           fetchFiles();
+          fetchWatchHistory();
           fetchSystemInfo();
         }
       } catch (err) {}
