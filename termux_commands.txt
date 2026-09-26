@@ -1,0 +1,93 @@
+================================================================================
+  JARVIS GLASS MEDIA SERVER & CLOUD STORAGE - TERMUX SETUP GUIDE
+================================================================================
+
+Follow these copy-paste commands in your phone's Termux app to turn your old
+mobile phone into a 24/7 Home Media Server and Personal Cloud Drive with SSH.
+
+--------------------------------------------------------------------------------
+STEP 1: GRANT STORAGE PERMISSION & UPDATE TERMUX
+--------------------------------------------------------------------------------
+Copy and paste this in Termux (tap 'Allow' on the phone popup):
+
+termux-setup-storage
+pkg update && pkg upgrade -y
+
+
+--------------------------------------------------------------------------------
+STEP 2: INSTALL REQUIRED PACKAGES (Python, Git, FFmpeg, OpenSSH, Compilers)
+--------------------------------------------------------------------------------
+Copy and paste this single command:
+
+pkg install -y git python ffmpeg openssh clang make python-dev termux-tools
+
+
+--------------------------------------------------------------------------------
+STEP 3: SETUP SSH FOR REMOTE ACCESS FROM YOUR PC / LAPTOP
+--------------------------------------------------------------------------------
+1. Set a password for your Termux user (you'll use this to log in from PC):
+
+passwd
+
+(Type a password like '1234' or your chosen secret and press Enter twice)
+
+2. Start the SSH server on your phone:
+
+sshd
+
+3. Find your Termux username and phone Wi-Fi IP address:
+
+whoami
+ip -4 addr show wlan0
+
+(Note down your username, e.g. 'u0_a245', and your phone's IP, e.g. '192.168.1.50')
+
+4. Test remote SSH access from your Windows PC PowerShell:
+   Open PowerShell on your laptop and run:
+
+ssh <YOUR_TERMUX_USER>@<YOUR_PHONE_IP> -p 8022
+
+   Example:
+   ssh u0_a245@192.168.1.50 -p 8022
+
+
+--------------------------------------------------------------------------------
+STEP 4: CLONE THE PROJECT & INSTALL PYTHON REQUIREMENTS
+--------------------------------------------------------------------------------
+Inside Termux on your phone (or through the SSH session):
+
+git clone https://github.com/Soham-Bhale/jarvis-glass-media-server.git
+cd jarvis-glass-media-server
+pip install --upgrade pip
+pip install -r requirements.txt
+
+
+--------------------------------------------------------------------------------
+STEP 5: PREVENT ANDROID FROM SLEEPING (24/7 BACKGROUND SERVER)
+--------------------------------------------------------------------------------
+Run this in Termux to keep the CPU awake even with the screen locked:
+
+termux-wake-lock
+
+*Tip: In your phone's Android Settings -> Apps -> Termux -> Battery / Power Saving:
+Set Battery usage to 'Unrestricted' or 'No Restrictions / Don't Optimize'.
+
+
+--------------------------------------------------------------------------------
+STEP 6: START THE MEDIA SERVER
+--------------------------------------------------------------------------------
+python app.py
+
+Once running, you can open:
+- On the phone itself: http://localhost:8000
+- On your Laptop / PC / other phones: http://<PHONE_IP>:8000
+
+
+--------------------------------------------------------------------------------
+QUICK 1-STEP LAUNCH SCRIPT (FOR EVERYDAY USE)
+--------------------------------------------------------------------------------
+Next time you open Termux, just run:
+
+cd ~/jarvis-glass-media-server && bash start-server.sh
+
+================================================================================

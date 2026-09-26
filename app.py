@@ -325,42 +325,39 @@ async def get_live_metrics():
 # --- PC Remote Power Management ---
 @app.post("/api/power/shutdown")
 async def trigger_shutdown(delay: int = Form(30)):
-    """
-    Schedules Windows shutdown.
-    Default delay is 30 seconds to allow cancellation if needed.
-    Pass delay=0 for instant shutdown.
-    """
+    """Schedules system shutdown (Windows PC or Linux/Android)."""
     try:
-        cmd = ["shutdown", "/s", "/t", str(delay), "/c", "JARVIS Remote Web Command: PC Shutting Down"]
-        subprocess.run(cmd, check=True)
-        return {
-            "status": "success",
-            "message": f"PC Shutdown initiated ({delay} seconds remaining).",
-            "delay": delay
-        }
+        if sys.platform.startswith("win"):
+            cmd = ["shutdown", "/s", "/t", str(delay), "/c", "JARVIS Remote Web Command: PC Shutting Down"]
+            subprocess.run(cmd, check=True)
+            return {"status": "success", "message": f"PC Shutdown initiated ({delay}s remaining).", "delay": delay}
+        else:
+            return {"status": "info", "message": f"Server running on {sys.platform}. Power management is tailored for Windows host."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to initiate shutdown: {e}")
 
 @app.post("/api/power/restart")
 async def trigger_restart(delay: int = Form(10)):
-    """Schedules PC Restart."""
+    """Schedules system restart."""
     try:
-        cmd = ["shutdown", "/r", "/t", str(delay), "/c", "JARVIS Remote Web Command: PC Restarting"]
-        subprocess.run(cmd, check=True)
-        return {
-            "status": "success",
-            "message": f"PC Restart initiated ({delay} seconds remaining).",
-            "delay": delay
-        }
+        if sys.platform.startswith("win"):
+            cmd = ["shutdown", "/r", "/t", str(delay), "/c", "JARVIS Remote Web Command: PC Restarting"]
+            subprocess.run(cmd, check=True)
+            return {"status": "success", "message": f"PC Restart initiated ({delay}s remaining).", "delay": delay}
+        else:
+            return {"status": "info", "message": f"Server running on {sys.platform}. Restart control is active for Windows host."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to initiate restart: {e}")
 
 @app.post("/api/power/cancel")
 async def cancel_power_action():
-    """Cancels any pending Windows shutdown or restart timer."""
+    """Cancels any pending shutdown or restart timer."""
     try:
-        subprocess.run(["shutdown", "/a"], check=True)
-        return {"status": "success", "message": "Pending shutdown/restart was successfully canceled."}
+        if sys.platform.startswith("win"):
+            subprocess.run(["shutdown", "/a"], check=True)
+            return {"status": "success", "message": "Pending shutdown/restart was successfully canceled."}
+        else:
+            return {"status": "info", "message": "No scheduled shutdown active."}
     except Exception as e:
         return {"status": "info", "message": "No scheduled shutdown was active to cancel."}
 
@@ -368,8 +365,11 @@ async def cancel_power_action():
 async def lock_workstation():
     """Immediately locks the Windows desktop screen."""
     try:
-        subprocess.run(["rundll32.exe", "user32.dll,LockWorkStation"])
-        return {"status": "success", "message": "PC Locked."}
+        if sys.platform.startswith("win"):
+            subprocess.run(["rundll32.exe", "user32.dll,LockWorkStation"])
+            return {"status": "success", "message": "PC Locked."}
+        else:
+            return {"status": "info", "message": "Lock screen only applicable on PC."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to lock workstation: {e}")
 
@@ -377,8 +377,11 @@ async def lock_workstation():
 async def trigger_sleep():
     """Puts Windows PC into Sleep / Standby."""
     try:
-        subprocess.run(["rundll32.exe", "powrprof.dll,SetSuspendState", "0,1,0"])
-        return {"status": "success", "message": "PC entering sleep mode."}
+        if sys.platform.startswith("win"):
+            subprocess.run(["rundll32.exe", "powrprof.dll,SetSuspendState", "0,1,0"])
+            return {"status": "success", "message": "PC entering sleep mode."}
+        else:
+            return {"status": "info", "message": "Sleep mode is configured for PC."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to sleep PC: {e}")
 
