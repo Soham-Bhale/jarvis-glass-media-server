@@ -73,5 +73,50 @@
     "completed": false,
     "last_watched": 1790961552.675047,
     "last_watched_str": "2026-10-02 22:49"
+  },
+  "videos/India’s Top 5 Most Powerful Missiles_R4kzzdbN-Yc.mp4": {
+    "key": "videos/India’s Top 5 Most Powerful Missiles_R4kzzdbN-Yc.mp4",
+    "category": "videos",
+    "filename": "India’s Top 5 Most Powerful Missiles_R4kzzdbN-Yc.mp4",
+    "title": "India’s Top 5 Most Powerful Missiles",
+    "thumbnail_url": "/api/thumbnails/India’s Top 5 Most Powerful Missiles_R4kzzdbN-Yc.mp4.jpg",
+    "stream_url": "/api/stream/videos/India’s Top 5 Most Powerful Missiles_R4kzzdbN-Yc.mp4",
+    "download_url": "/api/download/videos/India’s Top 5 Most Powerful Missiles_R4kzzdbN-Yc.mp4",
+    "position_seconds": 789.2,
+    "duration_seconds": 802.1,
+    "percent": 98.4,
+    "completed": true,
+    "last_watched": 1790964192.3940568,
+    "last_watched_str": "2026-10-02 23:33"
+  },
+  "videos/Israel’s Indian Hero Captain Smit Machchhar ｜ The Chanakya Dialogues Major Gaurav Arya ｜ PM Modi ｜_oaYdObwwl18.mp4": {
+    "key": "videos/Israel’s Indian Hero Captain Smit Machchhar ｜ The Chanakya Dialogues Major Gaurav Arya ｜ PM Modi ｜_oaYdObwwl18.mp4",
+    "category": "videos",
+    "filename": "Israel’s Indian Hero Captain Smit Machchhar ｜ The Chanakya Dialogues Major Gaurav Arya ｜ PM Modi ｜_oaYdObwwl18.mp4",
+    "title": "Israel’s Indian Hero Captain Smit Machchhar | The Chanakya Dialogues Major Gaurav Arya | PM Modi |",
+    "thumbnail_url": "/api/thumbnails/Israel’s Indian Hero Captain Smit Machchhar ｜ The Chanakya Dialogues Major Gaurav Arya ｜ PM Modi ｜_oaYdObwwl18.mp4.jpg",
+    "stream_url": "/api/stream/videos/Israel’s Indian Hero Captain Smit Machchhar ｜ The Chanakya Dialogues Major Gaurav Arya ｜ PM Modi ｜_oaYdObwwl18.mp4",
+    "download_url": "/api/download/videos/Israel’s Indian Hero Captain Smit Machchhar ｜ The Chanakya Dialogues Major Gaurav Arya ｜ PM Modi ｜_oaYdObwwl18.mp4",
+    "position_seconds": 632.5,
+    "duration_seconds": 1031.3,
+    "percent": 61.3,
+    "completed": false,
+    "last_watched": 1790964845.548907,
+    "last_watched_str": "2026-10-02 23:44"
+  },
+  "videos/Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK_JPdXieDZl3I.mp4": {
+    "key": "videos/Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK_JPdXieDZl3I.mp4",
+    "category": "videos",
+    "filename": "Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK_JPdXieDZl3I.mp4",
+    "title": "Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK",
+    "thumbnail_url": "/api/thumbnails/Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK_JPdXieDZl3I.mp4.jpg",
+    "stream_url": "/api/stream/videos/Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK_JPdXieDZl3I.mp4",
+    "download_url": "/api/download/videos/Defence Updates - PAK Exposed, India C-390 Aircraft Assembly, BSF Eliminated 2 PAK_JPdXieDZl3I.mp4",
+    "position_seconds": 9.4,
+    "duration_seconds": 774.6,
+    "percent": 1.2,
+    "completed": false,
+    "last_watched": 1790964279.5418293,
+    "last_watched_str": "2026-10-02 23:34"
   }
 }

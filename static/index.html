@@ -22,7 +22,7 @@
       --yt-chip-active: #ffffff;
       --yt-chip-active-text: #0f0f0f;
       --accent-cyan: #00e5c9;
-      --glass-card: rgba(24, 24, 24, 0.92);
+      --glass-card: rgba(24, 24, 24, 0.94);
       --glass-border: rgba(255, 255, 255, 0.12);
       --trans-speed: 0.2s;
     }
@@ -58,7 +58,7 @@
       color: var(--yt-text-primary);
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 90px;
+      padding-bottom: 110px;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
@@ -217,19 +217,6 @@
       width: 22px;
       height: 22px;
     }
-    .badge-count {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: var(--yt-red);
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      border-radius: 10px;
-      padding: 1px 5px;
-      min-width: 16px;
-      text-align: center;
-    }
 
     .pill-action-btn {
       display: inline-flex;
@@ -237,17 +224,24 @@
       gap: 6px;
       padding: 7px 14px;
       border-radius: 20px;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       border: 1px solid var(--yt-border);
       background: var(--yt-surface);
       color: var(--yt-text-primary);
       transition: all var(--trans-speed);
+      white-space: nowrap;
     }
     .pill-action-btn:hover {
       background: var(--yt-surface-hover);
       border-color: rgba(255, 255, 255, 0.25);
+    }
+    .pill-action-btn.active {
+      background: var(--accent-cyan);
+      color: #031c19;
+      border-color: var(--accent-cyan);
+      font-weight: 700;
     }
     .btn-create {
       background: rgba(0, 229, 201, 0.15);
@@ -332,7 +326,6 @@
       color: var(--yt-text-secondary);
     }
 
-    /* Horizontal scroll for shelf items */
     .yt-shelf-scroll {
       display: flex;
       gap: 16px;
@@ -401,7 +394,6 @@
       letter-spacing: 0.5px;
       z-index: 2;
     }
-    /* YouTube Red Progress Bar */
     .yt-progress-bar {
       position: absolute;
       bottom: 0;
@@ -411,6 +403,28 @@
       z-index: 3;
     }
 
+    /* Quick hover queue badge */
+    .yt-quick-queue-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: none;
+      z-index: 4;
+      backdrop-filter: blur(4px);
+    }
+    .yt-card:hover .yt-quick-queue-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     /* Video Details Row */
     .yt-card-details {
       display: flex;
@@ -418,7 +432,6 @@
       margin-top: 12px;
       align-items: flex-start;
     }
-    /* Channel Avatar Circle */
     .yt-channel-avatar {
       width: 36px;
       height: 36px;
@@ -439,7 +452,6 @@
     .avatar-red { background: linear-gradient(135deg, #ff4444, #990000); color: #fff; }
     .avatar-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); color: #fff; }
 
-    /* Metadata Column */
     .yt-meta-col {
       flex: 1;
       min-width: 0;
@@ -480,7 +492,6 @@
       font-weight: 800;
     }
 
-    /* UPLOAD TIME & METADATA LINE */
     .yt-upload-info {
       font-size: 12.5px;
       color: var(--yt-text-secondary);
@@ -495,7 +506,7 @@
       font-weight: 600;
     }
 
-    /* SINGLE 3-DOTS BUTTON */
+    /* Single 3-Dots Button */
     .yt-dots-btn {
       width: 32px;
       height: 32px;
@@ -520,7 +531,7 @@
     .yt-menu-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 200;
+      z-index: 400;
       display: none;
     }
     .yt-context-menu {
@@ -531,7 +542,7 @@
       padding: 6px 0;
       width: 220px;
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
-      z-index: 201;
+      z-index: 401;
       display: none;
     }
     [data-theme="light"] .yt-context-menu {
@@ -560,7 +571,7 @@
       background: rgba(255, 77, 77, 0.15);
     }
 
-    /* ================= 7. YOUTUBE WATCH MODAL / PLAYER ================= */
+    /* ================= 7. YOUTUBE WATCH MODAL / THEATER VIEW ================= */
     .yt-watch-overlay {
       position: fixed;
       inset: 0;
@@ -578,12 +589,11 @@
       height: 56px;
       padding: 0 20px;
       border-bottom: 1px solid var(--yt-border);
-      background: rgba(15, 15, 15, 0.8);
+      background: rgba(15, 15, 15, 0.85);
       position: sticky;
       top: 0;
       z-index: 10;
     }
-    /* BACK BUTTON (Requested by user) */
     .yt-back-btn {
       display: flex;
       align-items: center;
@@ -626,12 +636,14 @@
       border-radius: 14px;
       overflow: hidden;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      position: relative;
     }
-    .yt-player-box video {
+    .yt-player-box video, .mini-video-box video {
       width: 100%;
       height: 100%;
       outline: none;
       display: block;
+      background: #000;
     }
 
     /* Watch Controls Row */
@@ -647,6 +659,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     /* Video Info Below Player */
@@ -674,7 +687,7 @@
       padding-top: 12px;
     }
 
-    /* Up Next / Queue Column */
+    /* Up Next / Queue Column in Theater */
     .yt-queue-sidebar {
       background: var(--yt-surface);
       border: 1px solid var(--yt-border);
@@ -692,51 +705,301 @@
       align-items: center;
       justify-content: space-between;
     }
-    .yt-queue-item {
+
+    /* ================= 8. FLOATING YOUTUBE QUEUE DOCK & EXPANDABLE DRAWER ================= */
+    .yt-queue-dock {
+      position: fixed;
+      bottom: 20px;
+      right: 24px;
+      z-index: 220;
+      display: none;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    /* Collapsed Bar */
+    .yt-queue-bar {
       display: flex;
+      align-items: center;
+      background: rgba(24, 24, 24, 0.95);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 6px 14px 6px 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: all var(--trans-speed);
+    }
+    .yt-queue-bar:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+    .yt-queue-bar-thumb {
+      width: 44px;
+      height: 30px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .yt-queue-bar-info {
+      display: flex;
+      flex-direction: column;
+      max-width: 170px;
+    }
+    .yt-queue-bar-title {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .yt-queue-bar-sub {
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Expanded Queue Drawer */
+    .yt-queue-drawer {
+      display: none;
+      width: 390px;
+      max-width: 90vw;
+      max-height: 490px;
+      background: #1e1e1e;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUpQueue 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUpQueue {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .yt-queue-drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid var(--yt-border);
+    }
+    .yt-queue-drawer-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .yt-queue-scroll-list {
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Queue Item Card */
+    .queue-card-row {
+      display: flex;
+      align-items: center;
       gap: 10px;
       padding: 8px;
       border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      transition: all var(--trans-speed);
       cursor: pointer;
-      transition: background var(--trans-speed);
-      margin-bottom: 8px;
     }
-    .yt-queue-item:hover {
+    .queue-card-row:hover {
       background: var(--yt-surface-hover);
+      border-color: rgba(255, 255, 255, 0.1);
     }
-    .yt-queue-thumb {
-      width: 100px;
+    .queue-card-row.active-playing {
+      background: rgba(0, 229, 201, 0.12);
+      border-color: rgba(0, 229, 201, 0.4);
+    }
+    .queue-reorder-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .btn-reorder {
+      background: transparent;
+      border: none;
+      color: var(--yt-text-muted);
+      cursor: pointer;
+      font-size: 10px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .btn-reorder:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .queue-item-thumb {
+      width: 72px;
       aspect-ratio: 16 / 9;
       border-radius: 6px;
       object-fit: cover;
       flex-shrink: 0;
     }
-    .yt-queue-info {
+    .queue-item-meta {
       flex: 1;
       min-width: 0;
     }
-    .yt-queue-title {
+    .queue-item-title {
       font-size: 13px;
       font-weight: 600;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      white-space: nowrap;
       overflow: hidden;
-      line-height: 1.3;
+      text-overflow: ellipsis;
+      color: var(--yt-text-primary);
     }
-    .yt-queue-meta {
-      font-size: 11.5px;
+    .queue-item-sub {
+      font-size: 11px;
       color: var(--yt-text-secondary);
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
-    /* ================= 8. MODAL WINDOWS (Channels, Download, Power, Drive) ================= */
+    /* ================= 9. POP-UP WINDOW / FLOATING MINIPLAYER ================= */
+    .yt-popup-window {
+      position: fixed;
+      bottom: 20px;
+      right: 24px;
+      width: 390px;
+      max-width: calc(100vw - 32px);
+      background: #181818;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 229, 201, 0.15);
+      z-index: 350;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      transition: width 0.2s ease;
+    }
+    .mini-video-box {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      position: relative;
+    }
+    /* Top controls bar inside miniplayer */
+    .mini-overlay-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 10px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .mini-video-box:hover .mini-overlay-bar {
+      opacity: 1;
+    }
+    .mini-title-marquee {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 65%;
+    }
+
+    /* Mini player rich controls block */
+    .mini-controls-block {
+      padding: 10px 14px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(24, 24, 24, 0.98);
+    }
+    .mini-primary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mini-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--yt-border);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all var(--trans-speed);
+    }
+    .mini-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .mini-btn.active {
+      background: var(--accent-cyan);
+      color: #031c19;
+      border-color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .mini-secondary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Volume Slider */
+    .mini-vol-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mini-vol-slider {
+      width: 65px;
+      height: 4px;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    /* Sleep Timer Pill Badge */
+    .timer-badge {
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      background: rgba(0, 229, 201, 0.15);
+      border: 1px solid rgba(0, 229, 201, 0.3);
+      border-radius: 12px;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+
+    /* ================= 10. MODAL WINDOWS ================= */
     .modal-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(10px);
-      z-index: 250;
+      z-index: 450;
       display: none;
       align-items: center;
       justify-content: center;
@@ -812,7 +1075,7 @@
       font-size: 14px;
       font-weight: 600;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      z-index: 500;
+      z-index: 600;
       opacity: 0;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       pointer-events: none;
@@ -827,9 +1090,11 @@
 
   <div class="ambient-glow"></div>
 
+  <!-- SHARED VIDEO ELEMENT (Dynamically reparented between Theater & Pop-up Window) -->
+  <video id="activeVideoPlayer" playsinline preload="metadata" style="display: none;"></video>
+
   <!-- ================= 1. TOP NAVBAR (YOUTUBE WEB) ================= -->
   <header class="yt-navbar">
-    <!-- Brand -->
     <a class="yt-brand" href="#" onclick="filterByChannel(''); return false;">
       <svg class="yt-logo-svg" viewBox="0 0 24 24">
         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -852,28 +1117,28 @@
 
     <!-- Right Action Buttons -->
     <div class="yt-nav-actions">
-      <!-- Sync 4 Recent Videos Button -->
+      <!-- Queue Toggle Button in Navbar -->
+      <button class="pill-action-btn" onclick="toggleQueueDrawer()" id="navQueueBtn" title="YouTube Queue">
+        <span>📋 Queue (<span id="navQueueCount">0</span>)</span>
+      </button>
+
       <button class="pill-action-btn btn-create" onclick="openChannelManager()" title="Channels & Sync 4 Recent Videos">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         <span>Channels & Sync</span>
       </button>
 
-      <!-- Download New Video -->
       <button class="pill-action-btn" onclick="openDownloadModal()" title="Download from YouTube">
         <span>+ Download</span>
       </button>
 
-      <!-- Cloud Drive & Upload -->
       <button class="yt-icon-btn" onclick="openDriveModal()" title="Cloud Drive & Upload">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       </button>
 
-      <!-- PC Power Button -->
       <button class="yt-icon-btn" onclick="openPowerModal()" title="PC Remote Power" style="color: #ff453a;">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
       </button>
 
-      <!-- Theme Toggle -->
       <button class="yt-icon-btn" onclick="toggleTheme()" title="Toggle Theme">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
       </button>
@@ -894,7 +1159,7 @@
   <!-- ================= 3. MAIN CONTAINER ================= -->
   <main class="yt-container">
 
-    <!-- Continue Watching Shelf (Only visible if there is watch progress) -->
+    <!-- Continue Watching Shelf -->
     <section class="yt-shelf" id="continueShelf" style="display: none;">
       <div class="yt-shelf-header">
         <div class="yt-shelf-title">
@@ -924,6 +1189,9 @@
     <div class="yt-menu-item" onclick="menuActionPlay()">
       <span>▶</span> Play Video
     </div>
+    <div class="yt-menu-item" onclick="menuActionPlayNext()">
+      <span>⏭</span> Play Next
+    </div>
     <div class="yt-menu-item" onclick="menuActionAddQueue()">
       <span>➕</span> Add to Queue
     </div>
@@ -935,36 +1203,56 @@
     </div>
   </div>
 
-  <!-- ================= 5. YOUTUBE WATCH MODAL ================= -->
+  <!-- ================= 5. YOUTUBE WATCH MODAL / THEATER VIEW ================= -->
   <div class="yt-watch-overlay" id="watchModal">
     <header class="yt-watch-header">
-      <!-- BACK BUTTON (Requested by user) -->
-      <button class="yt-back-btn" onclick="closeWatchModal()">
+      <!-- Back Button -->
+      <button class="yt-back-btn" onclick="minimizeWatchToPopup()">
         <span>←</span>
-        <span>Back to Browse</span>
+        <span>Back to Browse (Pop-up Player)</span>
       </button>
 
-      <div style="font-size: 15px; font-weight: 700; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="watchModalTitle">
+      <div style="font-size: 15px; font-weight: 700; max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="watchModalTitle">
         Playing Video
       </div>
 
-      <button class="modal-close" onclick="closeWatchModal()" title="Close">✕</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Pop-out to Miniplayer Button -->
+        <button class="pill-action-btn" onclick="minimizeWatchToPopup()" title="Pop out into floating miniplayer">
+          <span>⤡ Miniplayer</span>
+        </button>
+
+        <!-- OS Picture-in-Picture Button -->
+        <button class="pill-action-btn" onclick="toggleNativePiP()" title="OS-level Picture-in-Picture">
+          <span>📺 PiP Window</span>
+        </button>
+
+        <button class="modal-close" onclick="closeFullPlayback()" title="Close Player">✕</button>
+      </div>
     </header>
 
     <div class="yt-watch-body">
       <!-- Left: Player Column -->
       <div class="yt-player-col">
-        <div class="yt-player-box">
-          <video id="glassVideoPlayer" controls playsinline preload="metadata"></video>
-        </div>
+        <div class="yt-player-box" id="theaterVideoContainer"></div>
 
         <!-- Controls Row -->
         <div class="yt-player-controls">
           <div class="yt-ctrl-group">
             <button class="pill-action-btn" onclick="playPreviousVideo()">⏮ Previous</button>
+            <button class="pill-action-btn" onclick="seekRelative(-10)">⏪ -10s</button>
+            <button class="pill-action-btn" onclick="togglePlayPause()" id="theaterPlayBtn">⏸ Pause</button>
+            <button class="pill-action-btn" onclick="seekRelative(10)">⏩ +10s</button>
             <button class="pill-action-btn" onclick="playNextVideo()">⏭ Next</button>
           </div>
+
           <div class="yt-ctrl-group">
+            <!-- Speed Button -->
+            <button class="pill-action-btn" onclick="cyclePlaybackSpeed()" id="theaterSpeedBtn" title="Speed">1.0x</button>
+            <!-- Sleep Timer -->
+            <button class="pill-action-btn" onclick="cycleSleepTimer()" id="theaterSleepBtn" title="Sleep Timer">🌙 Timer: Off</button>
+            <!-- Loop -->
+            <button class="pill-action-btn" onclick="toggleLoopCurrent()" id="theaterLoopBtn" title="Loop">🔁 Loop</button>
             <button class="pill-action-btn" onclick="queueCurrentVideo()">➕ Add to Queue</button>
             <a class="pill-action-btn" id="watchDownloadBtn" href="#" download style="text-decoration: none;">⬇ Download</a>
           </div>
@@ -988,18 +1276,105 @@
         </div>
       </div>
 
-      <!-- Right: Up Next Queue Sidebar -->
+      <!-- Right: Queue Sidebar in Theater Mode -->
       <div class="yt-queue-sidebar">
         <div class="yt-queue-header">
-          <span>Up Next / Queue</span>
-          <button class="pill-action-btn" style="padding: 4px 10px; font-size: 11.5px;" onclick="clearPlaybackQueue()">Clear</button>
+          <span>Up Next / Queue (<span id="theaterQueueCount">0</span>)</span>
+          <div style="display: flex; gap: 6px;">
+            <button class="pill-action-btn" style="padding: 4px 8px; font-size: 11px;" onclick="shuffleQueueRemote()" title="Shuffle">🔀</button>
+            <button class="pill-action-btn" style="padding: 4px 8px; font-size: 11px;" onclick="clearPlaybackQueue()">Clear</button>
+          </div>
         </div>
         <div id="queueList"></div>
       </div>
     </div>
   </div>
 
-  <!-- ================= 6. CHANNELS MANAGER & 4-VIDEO SYNC MODAL ================= -->
+  <!-- ================= 6. FLOATING YOUTUBE QUEUE DOCK & EXPANDABLE DRAWER ================= -->
+  <div class="yt-queue-dock" id="floatingQueueDock">
+    <!-- Expandable Drawer -->
+    <div class="yt-queue-drawer" id="queueDrawer">
+      <div class="yt-queue-drawer-head">
+        <div>
+          <strong style="font-size: 14px;">Queue</strong>
+          <span style="font-size: 12px; color: var(--accent-cyan); margin-left: 6px;" id="drawerQueueCounter">0 videos</span>
+        </div>
+        <div class="yt-queue-drawer-tools">
+          <button class="mini-btn" onclick="toggleLoopQueue()" id="drawerLoopBtn" title="Loop Entire Queue" style="width: 28px; height: 28px; font-size: 11px;">🔁</button>
+          <button class="mini-btn" onclick="shuffleQueueRemote()" title="Shuffle Queue" style="width: 28px; height: 28px; font-size: 11px;">🔀</button>
+          <button class="mini-btn" onclick="clearPlaybackQueue()" title="Clear Queue" style="width: 28px; height: 28px; font-size: 11px;">🗑</button>
+          <button class="mini-btn" onclick="toggleQueueDrawer()" title="Collapse" style="width: 28px; height: 28px; font-size: 11px;">▼</button>
+        </div>
+      </div>
+      <div class="yt-queue-scroll-list" id="drawerQueueList"></div>
+    </div>
+
+    <!-- Collapsed Bottom Bar -->
+    <div class="yt-queue-bar" id="queueBar" onclick="toggleQueueDrawer()">
+      <img class="yt-queue-bar-thumb" id="queueBarThumb" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60">
+      <div class="yt-queue-bar-info">
+        <span class="yt-queue-bar-title" id="queueBarTitle">Queue</span>
+        <span class="yt-queue-bar-sub" id="queueBarSub">0 videos remaining</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 4px;" onclick="event.stopPropagation()">
+        <button class="mini-btn" onclick="togglePlayPause()" id="queueBarPlayBtn" style="width: 30px; height: 30px; font-size: 12px;">▶</button>
+        <button class="mini-btn" onclick="playNextVideo()" style="width: 30px; height: 30px; font-size: 12px;">⏭</button>
+        <button class="mini-btn" onclick="toggleQueueDrawer()" style="width: 30px; height: 30px; font-size: 12px;" id="queueExpandArrow">▲</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 7. FLOATING POP-UP WINDOW / MINIPLAYER ================= -->
+  <div class="yt-popup-window" id="floatingMiniplayer">
+    <div class="mini-video-box" id="miniVideoContainer">
+      <!-- Top Hover Overlay -->
+      <div class="mini-overlay-bar">
+        <div class="mini-title-marquee" id="miniVideoTitle">Video Title</div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <!-- Expand to Full Theater -->
+          <button class="mini-btn" style="width: 26px; height: 26px; font-size: 11px;" onclick="expandPopupToTheater()" title="Expand to Theater">⤢</button>
+          <!-- Native OS PiP -->
+          <button class="mini-btn" style="width: 26px; height: 26px; font-size: 11px;" onclick="toggleNativePiP()" title="OS Picture-in-Picture">📺</button>
+          <!-- Close Miniplayer -->
+          <button class="mini-btn" style="width: 26px; height: 26px; font-size: 11px;" onclick="closeFullPlayback()" title="Close">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini Controls Block with Important Features -->
+    <div class="mini-controls-block">
+      <!-- Playback Row -->
+      <div class="mini-primary-row">
+        <button class="mini-btn" onclick="playPreviousVideo()" title="Previous Video">⏮</button>
+        <button class="mini-btn" onclick="seekRelative(-10)" title="Rewind 10s">⏪</button>
+        <button class="mini-btn" onclick="togglePlayPause()" id="miniPlayPauseBtn" style="width: 40px; height: 40px; font-size: 16px; background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan);">▶</button>
+        <button class="mini-btn" onclick="seekRelative(10)" title="Forward 10s">⏩</button>
+        <button class="mini-btn" onclick="playNextVideo()" title="Next Video">⏭</button>
+      </div>
+
+      <!-- Feature Toolbar Row -->
+      <div class="mini-secondary-row">
+        <!-- Playback Speed -->
+        <button class="mini-btn" style="width: auto; height: 26px; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 700;" onclick="cyclePlaybackSpeed()" id="miniSpeedBtn">1.0x</button>
+
+        <!-- Volume & Mute -->
+        <div class="mini-vol-wrap">
+          <span style="cursor: pointer; font-size: 13px;" onclick="toggleMute()" id="miniMuteIcon">🔊</span>
+          <input type="range" class="mini-vol-slider" min="0" max="1" step="0.05" value="1" oninput="setVideoVolume(this.value)" id="miniVolSlider">
+        </div>
+
+        <!-- Single Loop -->
+        <button class="mini-btn" style="width: 28px; height: 28px; font-size: 11px;" onclick="toggleLoopCurrent()" id="miniLoopBtn" title="Loop Video">🔂</button>
+
+        <!-- Sleep Timer -->
+        <div class="timer-badge" onclick="cycleSleepTimer()" id="miniTimerBadge" title="Sleep Timer">
+          🌙 Off
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 8. CHANNELS MANAGER & 4-VIDEO SYNC MODAL ================= -->
   <div class="modal-overlay" id="channelModal">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -1022,7 +1397,7 @@
     </div>
   </div>
 
-  <!-- ================= 7. DOWNLOAD / SCRAPE MODAL ================= -->
+  <!-- ================= 9. DOWNLOAD / SCRAPE MODAL ================= -->
   <div class="modal-overlay" id="downloadModal">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -1050,7 +1425,7 @@
     </div>
   </div>
 
-  <!-- ================= 8. CLOUD DRIVE & UPLOAD MODAL ================= -->
+  <!-- ================= 10. CLOUD DRIVE & UPLOAD MODAL ================= -->
   <div class="modal-overlay" id="driveModal">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -1073,7 +1448,7 @@
     </div>
   </div>
 
-  <!-- ================= 9. PC REMOTE POWER MODAL ================= -->
+  <!-- ================= 11. PC REMOTE POWER MODAL ================= -->
   <div class="modal-overlay" id="powerModal">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -1105,17 +1480,35 @@
   <div class="yt-toast" id="toastBox">Message</div>
 
   <script>
-    // --- State Variables ---
+    // --- Application State ---
     let cachedFiles = [];
     let cachedChannels = [];
     let cachedQueue = [];
     let cachedHistory = [];
-    let activeFilter = ""; // "" = All, or channel name
+    let activeFilter = "";
     let selectedMenuMedia = null;
     let qrRendered = false;
 
-    // Track currently playing video
-    let currentVideoMeta = { filename: "", category: "videos", duration: 0 };
+    // Player State
+    let currentVideoMeta = {
+      filename: "",
+      title: "",
+      category: "videos",
+      uploader: "YouTube",
+      streamUrl: "",
+      downloadUrl: "",
+      duration: 0,
+      uploadTs: 0
+    };
+    let playerViewMode = "none"; // 'theater', 'popup', or 'none'
+    let isLoopCurrent = false;
+    let isLoopQueue = false;
+    let currentPlaybackSpeed = 1.0;
+    let speedsList = [0.75, 1.0, 1.25, 1.5, 2.0];
+    let sleepTimerMinutes = 0; // 0 = off, 15, 30, 45, 60, -1 = end of video
+    let sleepTimerTimeout = null;
+    let sleepCountdownInterval = null;
+    let sleepSecondsRemaining = 0;
     let videoProgressSyncTimer = null;
 
     // --- On DOM Load ---
@@ -1125,12 +1518,12 @@
       fetchFiles();
       fetchWatchHistory();
       fetchPlaybackQueue();
-      initVideoPlayerEvents();
+      initPlayerEvents();
 
       setInterval(pollActiveTasks, 4000);
     });
 
-    // --- Helper: Format Relative & Exact YouTube Upload Time ---
+    // --- Format YouTube Upload Date ---
     function formatYouTubeDate(uploadTimestamp, uploadDateStr) {
       if (uploadTimestamp) {
         const now = Date.now() / 1000;
@@ -1204,7 +1597,6 @@
 
       let filtered = [...cachedFiles];
 
-      // Channel filter
       if (activeFilter) {
         filtered = filtered.filter(v => (v.uploader && v.uploader.toLowerCase() === activeFilter.toLowerCase()) || v.title.toLowerCase().includes(activeFilter.toLowerCase()));
         titleEl.textContent = activeFilter;
@@ -1212,7 +1604,6 @@
         titleEl.textContent = "Recent YouTube Videos";
       }
 
-      // Search keyword filter
       const q = document.getElementById("searchInput").value.trim().toLowerCase();
       if (q) {
         filtered = filtered.filter(v => v.title.toLowerCase().includes(q) || (v.uploader && v.uploader.toLowerCase().includes(q)));
@@ -1244,12 +1635,17 @@
         const av = getChannelAvatar(channel);
 
         return `
-          <div class="yt-card" onclick="openWatchModal('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', ${resumeSec}, ${vid.upload_timestamp || 0})">
+          <div class="yt-card" onclick="startPlayback('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', ${resumeSec}, ${vid.upload_timestamp || 0})">
             <!-- 16:9 Thumbnail -->
             <div class="yt-thumb-wrap">
               <img class="yt-thumb-img" src="${thumb}" alt="${vid.title}" loading="lazy">
               ${durationStr ? `<span class="yt-duration-badge">${durationStr}</span>` : ''}
               ${progressPct > 0 ? `<div class="yt-progress-bar" style="width: ${progressPct}%;"></div>` : ''}
+
+              <!-- Quick Queue Pill on Hover -->
+              <div class="yt-quick-queue-btn" onclick="event.stopPropagation(); addToQueueDirect('${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}')">
+                <span>➕ Queue</span>
+              </div>
             </div>
 
             <!-- Details: Avatar, Title, Channel, Upload Date, SINGLE 3-Dots -->
@@ -1264,7 +1660,7 @@
                   <span>${channel}</span>
                   <span class="yt-verified-badge" title="Verified">✓</span>
                 </div>
-                <!-- TRUE YOUTUBE UPLOAD TIME MENTIONED BELOW -->
+                <!-- YouTube Upload Date Display -->
                 <div class="yt-upload-info">
                   <span class="highlight-date">${uploadDateStr}</span>
                   <span>•</span>
@@ -1272,7 +1668,7 @@
                 </div>
               </div>
 
-              <!-- SINGLE 3-DOTS BUTTON (No duplicates!) -->
+              <!-- SINGLE 3-DOTS BUTTON -->
               <button class="yt-dots-btn" onclick="openContextMenu(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumeSec})" title="Options">
                 ⋮
               </button>
@@ -1305,11 +1701,11 @@
         const channel = vid.uploader || "YouTube";
 
         return `
-          <div style="flex: 0 0 260px; cursor: pointer;" onclick="openWatchModal('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', ${resumeSec}, ${vid.upload_timestamp || 0})">
+          <div style="flex: 0 0 260px; cursor: pointer;" onclick="startPlayback('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', ${resumeSec}, ${vid.upload_timestamp || 0})">
             <div class="yt-thumb-wrap" style="aspect-ratio: 16/9; margin-bottom: 8px;">
               <img class="yt-thumb-img" src="${thumb}">
               <div class="yt-progress-bar" style="width: ${progressPct}%;"></div>
-              <span class="yt-duration-badge">${Math.round(progressPct)}% watched</span>
+              <span class="yt-duration-badge">${Math.round(progressPct)}%</span>
             </div>
             <div style="font-size: 13.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${vid.title}</div>
             <div style="font-size: 12px; color: var(--yt-text-secondary); margin-top: 2px;">${channel} • Resume at ${formatDuration(resumeSec)}</div>
@@ -1355,7 +1751,7 @@
         const uploadDateStr = formatYouTubeDate(vid.upload_timestamp, vid.upload_date);
 
         return `
-          <div class="yt-card" onclick="openWatchModal('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted || ''}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', 0, ${vid.upload_timestamp || 0})">
+          <div class="yt-card" onclick="startPlayback('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted || ''}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', 0, ${vid.upload_timestamp || 0})">
             <div class="yt-thumb-wrap">
               <img class="yt-thumb-img" src="${thumb}">
               ${vid.duration ? `<span class="yt-duration-badge">${formatDuration(vid.duration)}</span>` : ''}
@@ -1419,14 +1815,21 @@
       if (!selectedMenuMedia) return;
       const m = selectedMenuMedia;
       closeContextMenu();
-      openWatchModal(m.streamUrl, encodeURIComponent(m.title), "", m.downloadUrl, encodeURIComponent(m.filename), "YouTube", m.resumeSec || 0, 0);
+      startPlayback(m.streamUrl, encodeURIComponent(m.title), "", m.downloadUrl, encodeURIComponent(m.filename), "YouTube", m.resumeSec || 0, 0);
+    }
+
+    function menuActionPlayNext() {
+      if (!selectedMenuMedia) return;
+      const m = selectedMenuMedia;
+      closeContextMenu();
+      addToQueueDirect(m.category, encodeURIComponent(m.filename), encodeURIComponent(m.title), true);
     }
 
     function menuActionAddQueue() {
       if (!selectedMenuMedia) return;
       const m = selectedMenuMedia;
       closeContextMenu();
-      addToQueue(m.category, encodeURIComponent(m.filename), encodeURIComponent(m.title));
+      addToQueueDirect(m.category, encodeURIComponent(m.filename), encodeURIComponent(m.title), false);
     }
 
     async function menuActionDelete() {
@@ -1445,20 +1848,30 @@
       }
     }
 
-    // --- 5. YouTube Watch Modal & Player ---
-    function openWatchModal(streamUrl, encTitle, sizeStr, downloadUrl, encFilename, encChannel, resumePos = 0, uploadTs = 0) {
-      const modal = document.getElementById("watchModal");
-      const player = document.getElementById("glassVideoPlayer");
+    // --- 5. Unified Video Playback Engine (Theater & Pop-up Window) ---
+    function startPlayback(streamUrl, encTitle, sizeStr, downloadUrl, encFilename, encChannel, resumePos = 0, uploadTs = 0) {
+      const player = document.getElementById("activeVideoPlayer");
       const title = decodeURIComponent(encTitle);
       const filename = decodeURIComponent(encFilename);
-      const channel = decodeURIComponent(encChannel || "YouTube Channel");
+      const channel = decodeURIComponent(encChannel || "YouTube");
 
-      currentVideoMeta = { filename, category: "videos", duration: 0 };
+      currentVideoMeta = {
+        filename,
+        title,
+        category: "videos",
+        uploader: channel,
+        streamUrl,
+        downloadUrl,
+        duration: 0,
+        uploadTs
+      };
 
+      // Set titles
       document.getElementById("watchModalTitle").textContent = title;
       document.getElementById("watchFullTitle").textContent = title;
       document.getElementById("watchChannelName").textContent = channel;
       document.getElementById("watchFileSize").textContent = `${sizeStr || 'Video'}`;
+      document.getElementById("miniVideoTitle").textContent = title;
 
       const av = getChannelAvatar(channel);
       const avEl = document.getElementById("watchChannelAvatar");
@@ -1472,9 +1885,20 @@
       dlBtn.href = downloadUrl;
       dlBtn.download = filename;
 
+      // Mount into Theater Mode by default
+      const theaterContainer = document.getElementById("theaterVideoContainer");
+      player.style.display = "block";
+      player.controls = true;
+      theaterContainer.appendChild(player);
+
       player.src = streamUrl;
-      modal.style.display = "flex";
+      player.playbackRate = currentPlaybackSpeed;
+      player.loop = isLoopCurrent;
+
+      document.getElementById("watchModal").style.display = "flex";
+      document.getElementById("floatingMiniplayer").style.display = "none";
       document.body.style.overflow = "hidden";
+      playerViewMode = "theater";
 
       player.onloadedmetadata = () => {
         currentVideoMeta.duration = player.duration;
@@ -1483,40 +1907,256 @@
           showToast(`Resumed from ${formatDuration(resumePos)}`);
         }
         player.play().catch(() => {});
+        updatePlayerUIState();
       };
 
-      // Periodic progress sync for watch history
       if (videoProgressSyncTimer) clearInterval(videoProgressSyncTimer);
       videoProgressSyncTimer = setInterval(syncVideoProgress, 5000);
 
+      // Show bottom Queue bar
+      updateQueueBarState();
       renderQueueList();
     }
 
-    // BACK BUTTON: Closes watch modal immediately (Requested by user)
-    function closeWatchModal() {
-      const modal = document.getElementById("watchModal");
-      const player = document.getElementById("glassVideoPlayer");
+    // Move player from Theater to Floating Pop-up Window
+    function minimizeWatchToPopup() {
+      const player = document.getElementById("activeVideoPlayer");
+      const miniContainer = document.getElementById("miniVideoContainer");
+
+      // Seamlessly reparent video without pausing
+      player.controls = false; // miniplayer has its own custom controls
+      miniContainer.appendChild(player);
+
+      document.getElementById("watchModal").style.display = "none";
+      document.getElementById("floatingMiniplayer").style.display = "flex";
+      document.body.style.overflow = "auto";
+      playerViewMode = "popup";
+
+      showToast("Playing in floating pop-up window");
+      updatePlayerUIState();
+    }
+
+    // Expand player from Floating Pop-up Window back to Theater
+    function expandPopupToTheater() {
+      const player = document.getElementById("activeVideoPlayer");
+      const theaterContainer = document.getElementById("theaterVideoContainer");
+
+      player.controls = true;
+      theaterContainer.appendChild(player);
+
+      document.getElementById("floatingMiniplayer").style.display = "none";
+      document.getElementById("watchModal").style.display = "flex";
+      document.body.style.overflow = "hidden";
+      playerViewMode = "theater";
+
+      updatePlayerUIState();
+    }
+
+    // Native OS Picture-in-Picture (Requested by user)
+    async function toggleNativePiP() {
+      const player = document.getElementById("activeVideoPlayer");
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else if (player.requestPictureInPicture) {
+          await player.requestPictureInPicture();
+          showToast("Picture-in-Picture window activated");
+        } else {
+          showToast("Picture-in-Picture is not supported in this browser.");
+        }
+      } catch (e) {
+        showToast("PiP error: " + e);
+      }
+    }
+
+    // Stop playback completely
+    function closeFullPlayback() {
+      const player = document.getElementById("activeVideoPlayer");
       syncVideoProgress();
 
       if (videoProgressSyncTimer) clearInterval(videoProgressSyncTimer);
       player.pause();
       player.src = "";
-      modal.style.display = "none";
+      player.style.display = "none";
+
+      document.getElementById("watchModal").style.display = "none";
+      document.getElementById("floatingMiniplayer").style.display = "none";
       document.body.style.overflow = "auto";
+      playerViewMode = "none";
+
       fetchWatchHistory();
       fetchFiles();
     }
 
-    function initVideoPlayerEvents() {
-      const player = document.getElementById("glassVideoPlayer");
+    function initPlayerEvents() {
+      const player = document.getElementById("activeVideoPlayer");
+
+      player.addEventListener("play", () => updatePlayerUIState());
+      player.addEventListener("pause", () => updatePlayerUIState());
+
       player.addEventListener("ended", () => {
         syncVideoProgress(true);
+        if (sleepTimerMinutes === -1) {
+          // Sleep timer: End of video
+          triggerSleepTimerAction();
+          return;
+        }
+        if (isLoopCurrent) {
+          player.currentTime = 0;
+          player.play();
+          return;
+        }
         playNextVideo();
       });
     }
 
+    function updatePlayerUIState() {
+      const player = document.getElementById("activeVideoPlayer");
+      const isPaused = player.paused;
+
+      // Play/Pause button icons
+      const thPlay = document.getElementById("theaterPlayBtn");
+      if (thPlay) thPlay.textContent = isPaused ? "▶ Play" : "⏸ Pause";
+
+      const miniPlay = document.getElementById("miniPlayPauseBtn");
+      if (miniPlay) miniPlay.textContent = isPaused ? "▶" : "⏸";
+
+      const qBarPlay = document.getElementById("queueBarPlayBtn");
+      if (qBarPlay) qBarPlay.textContent = isPaused ? "▶" : "⏸";
+
+      // Loop buttons
+      const thLoop = document.getElementById("theaterLoopBtn");
+      if (thLoop) thLoop.classList.toggle("active", isLoopCurrent);
+      const miniLoop = document.getElementById("miniLoopBtn");
+      if (miniLoop) miniLoop.classList.toggle("active", isLoopCurrent);
+
+      // Speed buttons
+      const thSpeed = document.getElementById("theaterSpeedBtn");
+      if (thSpeed) thSpeed.textContent = `${currentPlaybackSpeed}x`;
+      const miniSpeed = document.getElementById("miniSpeedBtn");
+      if (miniSpeed) miniSpeed.textContent = `${currentPlaybackSpeed}x`;
+    }
+
+    function togglePlayPause() {
+      const player = document.getElementById("activeVideoPlayer");
+      if (!player.src) return;
+      if (player.paused) {
+        player.play();
+      } else {
+        player.pause();
+      }
+      updatePlayerUIState();
+    }
+
+    function seekRelative(sec) {
+      const player = document.getElementById("activeVideoPlayer");
+      if (!player.duration) return;
+      player.currentTime = Math.max(0, Math.min(player.duration, player.currentTime + sec));
+      showToast(`${sec > 0 ? '+' : ''}${sec}s`);
+    }
+
+    function cyclePlaybackSpeed() {
+      const player = document.getElementById("activeVideoPlayer");
+      const curIdx = speedsList.indexOf(currentPlaybackSpeed);
+      const nextIdx = (curIdx + 1) % speedsList.length;
+      currentPlaybackSpeed = speedsList[nextIdx];
+      player.playbackRate = currentPlaybackSpeed;
+      updatePlayerUIState();
+      showToast(`Playback speed: ${currentPlaybackSpeed}x`);
+    }
+
+    function toggleLoopCurrent() {
+      isLoopCurrent = !isLoopCurrent;
+      document.getElementById("activeVideoPlayer").loop = isLoopCurrent;
+      updatePlayerUIState();
+      showToast(`Loop Video: ${isLoopCurrent ? 'ON' : 'OFF'}`);
+    }
+
+    function toggleLoopQueue() {
+      isLoopQueue = !isLoopQueue;
+      const btn = document.getElementById("drawerLoopBtn");
+      if (btn) btn.classList.toggle("active", isLoopQueue);
+      showToast(`Loop Queue: ${isLoopQueue ? 'ON' : 'OFF'}`);
+    }
+
+    function setVideoVolume(val) {
+      const player = document.getElementById("activeVideoPlayer");
+      player.volume = parseFloat(val);
+      const icon = document.getElementById("miniMuteIcon");
+      if (player.volume === 0) icon.textContent = "🔇";
+      else if (player.volume < 0.5) icon.textContent = "🔉";
+      else icon.textContent = "🔊";
+    }
+
+    function toggleMute() {
+      const player = document.getElementById("activeVideoPlayer");
+      player.muted = !player.muted;
+      const icon = document.getElementById("miniMuteIcon");
+      icon.textContent = player.muted ? "🔇" : "🔊";
+      showToast(player.muted ? "Muted" : "Unmuted");
+    }
+
+    // Sleep Timer Feature (Off -> 15m -> 30m -> 45m -> 60m -> End of Video)
+    function cycleSleepTimer() {
+      if (sleepTimerTimeout) clearTimeout(sleepTimerTimeout);
+      if (sleepCountdownInterval) clearInterval(sleepCountdownInterval);
+
+      if (sleepTimerMinutes === 0) sleepTimerMinutes = 15;
+      else if (sleepTimerMinutes === 15) sleepTimerMinutes = 30;
+      else if (sleepTimerMinutes === 30) sleepTimerMinutes = 45;
+      else if (sleepTimerMinutes === 45) sleepTimerMinutes = 60;
+      else if (sleepTimerMinutes === 60) sleepTimerMinutes = -1; // End of video
+      else sleepTimerMinutes = 0;
+
+      updateSleepTimerBadge();
+    }
+
+    function updateSleepTimerBadge() {
+      const thBtn = document.getElementById("theaterSleepBtn");
+      const miniBadge = document.getElementById("miniTimerBadge");
+
+      if (sleepTimerMinutes === 0) {
+        if (thBtn) thBtn.textContent = "🌙 Timer: Off";
+        if (miniBadge) miniBadge.textContent = "🌙 Off";
+        showToast("Sleep timer turned off");
+        return;
+      }
+
+      if (sleepTimerMinutes === -1) {
+        if (thBtn) thBtn.textContent = "🌙 Timer: End of Video";
+        if (miniBadge) miniBadge.textContent = "🌙 End of Vid";
+        showToast("Sleep timer set to: End of Video");
+        return;
+      }
+
+      sleepSecondsRemaining = sleepTimerMinutes * 60;
+      showToast(`Sleep timer set to: ${sleepTimerMinutes} minutes`);
+
+      sleepCountdownInterval = setInterval(() => {
+        sleepSecondsRemaining--;
+        if (sleepSecondsRemaining <= 0) {
+          clearInterval(sleepCountdownInterval);
+          triggerSleepTimerAction();
+        } else {
+          const m = Math.floor(sleepSecondsRemaining / 60);
+          const s = sleepSecondsRemaining % 60;
+          const str = `${m}:${s < 10 ? '0' + s : s}`;
+          if (thBtn) thBtn.textContent = `🌙 ${str}`;
+          if (miniBadge) miniBadge.textContent = `🌙 ${str}`;
+        }
+      }, 1000);
+    }
+
+    function triggerSleepTimerAction() {
+      const player = document.getElementById("activeVideoPlayer");
+      player.pause();
+      sleepTimerMinutes = 0;
+      updateSleepTimerBadge();
+      showToast("🌙 Sleep timer ended. Playback paused.");
+    }
+
     async function syncVideoProgress(forceCompleted = false) {
-      const player = document.getElementById("glassVideoPlayer");
+      const player = document.getElementById("activeVideoPlayer");
       if (!player || !player.duration || !currentVideoMeta.filename) return;
 
       const pos = player.currentTime;
@@ -1539,20 +2179,69 @@
       }
     }
 
+    // --- 6. YouTube Queue Engine ---
+    async function fetchPlaybackQueue() {
+      try {
+        const res = await fetch("/api/queue");
+        const data = await res.json();
+        cachedQueue = data.queue || [];
+        updateQueueCounts();
+        renderQueueList();
+        updateQueueBarState();
+      } catch (e) {
+        console.error("Error fetching queue:", e);
+      }
+    }
+
+    function updateQueueCounts() {
+      const len = cachedQueue.length;
+      document.getElementById("chipQueueCount").textContent = len;
+      document.getElementById("navQueueCount").textContent = len;
+      document.getElementById("theaterQueueCount").textContent = len;
+      document.getElementById("drawerQueueCounter").textContent = `${len} video${len === 1 ? '' : 's'}`;
+    }
+
+    async function addToQueueDirect(category, encFilename, encTitle, playNext = false) {
+      const filename = decodeURIComponent(encFilename);
+      const title = decodeURIComponent(encTitle);
+
+      try {
+        const fd = new FormData();
+        fd.append("category", category);
+        fd.append("filename", filename);
+        fd.append("play_next", playNext);
+
+        const res = await fetch("/api/queue/add", { method: "POST", body: fd });
+        const data = await res.json();
+        showToast(data.message || (playNext ? `Will play next: "${title}"` : `Added to queue: "${title}"`));
+        fetchPlaybackQueue();
+      } catch (e) {
+        showToast("Error adding to queue: " + e);
+      }
+    }
+
     function playNextVideo() {
       if (cachedQueue.length > 0) {
         const next = cachedQueue.shift();
-        updateQueueRemote();
-        openWatchModal(next.stream_url, encodeURIComponent(next.title), next.size_formatted || '', next.download_url, encodeURIComponent(next.filename), encodeURIComponent(next.uploader || 'YouTube'), 0, next.upload_timestamp || 0);
+        removeQueueItemRemote(next.key);
+        startPlayback(next.stream_url, encodeURIComponent(next.title), "", next.download_url, encodeURIComponent(next.filename), encodeURIComponent(next.uploader || 'YouTube'), 0, 0);
         return;
       }
-      // Play next in cachedFiles
+
+      // If loop queue is on, replay from cachedFiles
+      if (isLoopQueue && cachedFiles.length > 0) {
+        const first = cachedFiles[0];
+        startPlayback(first.stream_url, encodeURIComponent(first.title), first.size_formatted, first.download_url, encodeURIComponent(first.filename), encodeURIComponent(first.uploader || 'YouTube'), 0, first.upload_timestamp || 0);
+        return;
+      }
+
+      // Next in cachedFiles
       const idx = cachedFiles.findIndex(f => f.filename === currentVideoMeta.filename);
       if (idx >= 0 && idx + 1 < cachedFiles.length) {
         const next = cachedFiles[idx + 1];
-        openWatchModal(next.stream_url, encodeURIComponent(next.title), next.size_formatted, next.download_url, encodeURIComponent(next.filename), encodeURIComponent(next.uploader || 'YouTube'), 0, next.upload_timestamp || 0);
+        startPlayback(next.stream_url, encodeURIComponent(next.title), next.size_formatted, next.download_url, encodeURIComponent(next.filename), encodeURIComponent(next.uploader || 'YouTube'), 0, next.upload_timestamp || 0);
       } else {
-        showToast("End of playback list.");
+        showToast("End of queue.");
       }
     }
 
@@ -1560,7 +2249,7 @@
       const idx = cachedFiles.findIndex(f => f.filename === currentVideoMeta.filename);
       if (idx > 0) {
         const prev = cachedFiles[idx - 1];
-        openWatchModal(prev.stream_url, encodeURIComponent(prev.title), prev.size_formatted, prev.download_url, encodeURIComponent(prev.filename), encodeURIComponent(prev.uploader || 'YouTube'), 0, prev.upload_timestamp || 0);
+        startPlayback(prev.stream_url, encodeURIComponent(prev.title), prev.size_formatted, prev.download_url, encodeURIComponent(prev.filename), encodeURIComponent(prev.uploader || 'YouTube'), 0, prev.upload_timestamp || 0);
       } else {
         showToast("No previous video.");
       }
@@ -1569,39 +2258,48 @@
     function queueCurrentVideo() {
       const vid = cachedFiles.find(f => f.filename === currentVideoMeta.filename);
       if (vid) {
-        addToQueue(vid.category, encodeURIComponent(vid.filename), encodeURIComponent(vid.title));
+        addToQueueDirect(vid.category, encodeURIComponent(vid.filename), encodeURIComponent(vid.title), false);
       }
     }
 
-    // --- 6. Playback Queue ---
-    async function fetchPlaybackQueue() {
-      try {
-        const res = await fetch("/api/queue");
-        const data = await res.json();
-        cachedQueue = data.queue || [];
-        document.getElementById("chipQueueCount").textContent = cachedQueue.length;
-        renderQueueList();
-      } catch (e) {
-        console.error("Error fetching queue:", e);
-      }
-    }
-
-    async function addToQueue(category, encFilename, encTitle) {
-      const filename = decodeURIComponent(encFilename);
-      const title = decodeURIComponent(encTitle);
-
+    async function moveQueueItem(key, direction) {
       try {
         const fd = new FormData();
-        fd.append("category", category);
-        fd.append("filename", filename);
-        fd.append("title", title);
-
-        const res = await fetch("/api/queue/add", { method: "POST", body: fd });
+        fd.append("key", key);
+        fd.append("direction", direction);
+        const res = await fetch("/api/queue/move", { method: "POST", body: fd });
         const data = await res.json();
-        showToast(data.message || `Added "${title}" to queue`);
-        fetchPlaybackQueue();
+        cachedQueue = data.queue || [];
+        renderQueueList();
       } catch (e) {
-        showToast("Error adding to queue: " + e);
+        console.error("Error moving queue item:", e);
+      }
+    }
+
+    async function removeQueueItemRemote(key) {
+      try {
+        const fd = new FormData();
+        fd.append("key", key);
+        const res = await fetch("/api/queue/remove", { method: "POST", body: fd });
+        const data = await res.json();
+        cachedQueue = data.queue || [];
+        updateQueueCounts();
+        renderQueueList();
+        updateQueueBarState();
+      } catch (e) {
+        console.error("Error removing from queue:", e);
+      }
+    }
+
+    async function shuffleQueueRemote() {
+      try {
+        const res = await fetch("/api/queue/shuffle", { method: "POST" });
+        const data = await res.json();
+        cachedQueue = data.queue || [];
+        renderQueueList();
+        showToast("Queue shuffled");
+      } catch (e) {
+        console.error("Error shuffling queue:", e);
       }
     }
 
@@ -1609,35 +2307,89 @@
       try {
         await fetch("/api/queue/clear", { method: "POST" });
         cachedQueue = [];
-        document.getElementById("chipQueueCount").textContent = "0";
+        updateQueueCounts();
         renderQueueList();
+        updateQueueBarState();
         showToast("Playback queue cleared.");
       } catch (e) {
         console.error("Error clearing queue:", e);
       }
     }
 
-    function renderQueueList() {
-      const container = document.getElementById("queueList");
-      if (!container) return;
+    function toggleQueueDrawer() {
+      const drawer = document.getElementById("queueDrawer");
+      const dock = document.getElementById("floatingQueueDock");
+      const isVisible = drawer.style.display === "flex";
 
-      if (cachedQueue.length === 0) {
-        container.innerHTML = `<div style="font-size: 13px; color: var(--yt-text-muted); text-align: center; padding: 20px;">Queue is empty. Use ⋮ on any video card to add.</div>`;
+      dock.style.display = "flex";
+      drawer.style.display = isVisible ? "none" : "flex";
+      document.getElementById("queueExpandArrow").textContent = isVisible ? "▲" : "▼";
+    }
+
+    function updateQueueBarState() {
+      const dock = document.getElementById("floatingQueueDock");
+      const titleEl = document.getElementById("queueBarTitle");
+      const subEl = document.getElementById("queueBarSub");
+      const thumbEl = document.getElementById("queueBarThumb");
+
+      if (cachedQueue.length === 0 && !currentVideoMeta.filename) {
+        dock.style.display = "none";
         return;
       }
 
-      container.innerHTML = cachedQueue.map((item, idx) => {
+      dock.style.display = "flex";
+
+      if (currentVideoMeta.filename) {
+        titleEl.textContent = currentVideoMeta.title;
+        subEl.textContent = `Now Playing • ${cachedQueue.length} in queue`;
+      } else if (cachedQueue.length > 0) {
+        const first = cachedQueue[0];
+        titleEl.textContent = first.title;
+        subEl.textContent = `Queue (${cachedQueue.length} videos)`;
+        thumbEl.src = first.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60';
+      }
+    }
+
+    function renderQueueList() {
+      const theaterEl = document.getElementById("queueList");
+      const drawerEl = document.getElementById("drawerQueueList");
+
+      if (cachedQueue.length === 0) {
+        const emptyMsg = `<div style="font-size: 13px; color: var(--yt-text-muted); text-align: center; padding: 24px;">Queue is empty. Click ⋮ or + Queue on any card to add!</div>`;
+        if (theaterEl) theaterEl.innerHTML = emptyMsg;
+        if (drawerEl) drawerEl.innerHTML = emptyMsg;
+        return;
+      }
+
+      const html = cachedQueue.map((item, idx) => {
         const thumb = item.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=60';
+        const isCurrent = item.filename === currentVideoMeta.filename;
+
         return `
-          <div class="yt-queue-item" onclick="openWatchModal('${item.stream_url}', '${encodeURIComponent(item.title)}', '', '${item.download_url}', '${encodeURIComponent(item.filename)}', 'YouTube', 0, 0)">
-            <img class="yt-queue-thumb" src="${thumb}">
-            <div class="yt-queue-info">
-              <div class="yt-queue-title">${idx + 1}. ${item.title}</div>
-              <div class="yt-queue-meta">${item.duration ? formatDuration(item.duration) : 'Video'}</div>
+          <div class="queue-card-row ${isCurrent ? 'active-playing' : ''}" onclick="startPlayback('${item.stream_url}', '${encodeURIComponent(item.title)}', '', '${item.download_url}', '${encodeURIComponent(item.filename)}', '${encodeURIComponent(item.uploader || 'YouTube')}', 0, 0)">
+            <!-- Reorder Controls -->
+            <div class="queue-reorder-btns" onclick="event.stopPropagation()">
+              <button class="btn-reorder" onclick="moveQueueItem('${item.key}', 'up')" title="Move Up">▲</button>
+              <button class="btn-reorder" onclick="moveQueueItem('${item.key}', 'down')" title="Move Down">▼</button>
             </div>
+
+            <!-- Thumbnail -->
+            <img class="queue-item-thumb" src="${thumb}">
+
+            <!-- Info -->
+            <div class="queue-item-meta">
+              <div class="queue-item-title">${idx + 1}. ${item.title}</div>
+              <div class="queue-item-sub">${item.uploader || 'YouTube Media'} • ${item.duration ? formatDuration(item.duration) : 'Video'}</div>
+            </div>
+
+            <!-- Remove Button -->
+            <button class="mini-btn" style="width: 26px; height: 26px; font-size: 11px; flex-shrink: 0;" onclick="event.stopPropagation(); removeQueueItemRemote('${item.key}')" title="Remove from queue">✕</button>
           </div>
         `;
       }).join('');
+
+      if (theaterEl) theaterEl.innerHTML = html;
+      if (drawerEl) drawerEl.innerHTML = html;
     }
 
     // --- 7. Channels & 4-Video Sync Management ---
@@ -1810,13 +2562,10 @@
           </div>
         `).join('');
 
-        // If any task completed, refresh files
         if (tasks.some(t => t.status === "completed")) {
           fetchFiles();
         }
-      } catch (e) {
-        // quiet error
-      }
+      } catch (e) {}
     }
 
     // --- 9. Cloud Drive & Upload Modal ---
@@ -1954,7 +2703,6 @@
     const savedTheme = localStorage.getItem("jarvis_theme");
     if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
 
-    // Watch history fetcher
     async function fetchWatchHistory() {
       try {
         const res = await fetch("/api/history");

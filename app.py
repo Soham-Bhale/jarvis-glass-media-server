@@ -555,28 +555,63 @@ async def get_playback_queue():
     return {"queue": load_playback_queue()}
 
 @app.post("/api/queue/add")
-async def add_to_playback_queue(category: str = Form("videos"), filename: str = Form(...)):
+async def add_to_playback_queue(
+    category: str = Form("videos"),
+    filename: str = Form(...),
+    play_next: bool = Form(False)
+):
     q = load_playback_queue()
     key = f"{category}/{filename}"
-    if any(item.get("key") == key for item in q):
-        return {"status": "info", "message": "Video is already in queue", "queue": q}
+    q = [item for item in q if item.get("key") != key]
 
     metadata = load_metadata().get(key, {})
     title = metadata.get("title", filename)
     thumb_url = f"/api/thumbnails/{filename}.jpg" if os.path.exists(os.path.join(THUMBNAILS_DIR, f"{filename}.jpg")) else metadata.get("thumbnail_url")
+    uploader = metadata.get("uploader", "YouTube Media")
+    duration = metadata.get("duration", 0)
 
-    q.append({
+    entry = {
         "key": key,
         "category": category,
         "filename": filename,
         "title": title,
+        "uploader": uploader,
+        "duration": duration,
         "thumbnail_url": thumb_url,
         "stream_url": f"/api/stream/{category}/{filename}",
         "download_url": f"/api/download/{category}/{filename}",
         "added_at": datetime.now().strftime("%H:%M:%S")
-    })
+    }
+
+    if play_next:
+        q.insert(0, entry)
+        msg = f"'{title}' will play next"
+    else:
+        q.append(entry)
+        msg = f"Added '{title}' to queue"
+
     save_playback_queue(q)
-    return {"status": "success", "message": f"Added '{title}' to queue", "queue": q}
+    return {"status": "success", "message": msg, "queue": q}
+
+@app.post("/api/queue/move")
+async def move_queue_item(key: str = Form(...), direction: str = Form(...)):
+    q = load_playback_queue()
+    idx = next((i for i, it in enumerate(q) if it.get("key") == key), -1)
+    if idx >= 0:
+        if direction == "up" and idx > 0:
+            q[idx], q[idx - 1] = q[idx - 1], q[idx]
+        elif direction == "down" and idx < len(q) - 1:
+            q[idx], q[idx + 1] = q[idx + 1], q[idx]
+    save_playback_queue(q)
+    return {"status": "success", "queue": q}
+
+@app.post("/api/queue/shuffle")
+async def shuffle_playback_queue():
+    import random
+    q = load_playback_queue()
+    random.shuffle(q)
+    save_playback_queue(q)
+    return {"status": "success", "message": "Queue shuffled", "queue": q}
 
 @app.post("/api/queue/remove")
 async def remove_from_playback_queue(key: str = Form(...)):
