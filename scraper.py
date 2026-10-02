@@ -72,12 +72,29 @@ def scrape_youtube_channels(limit_per_channel=4, quality="720"):
                         else:
                             generate_video_thumbnail(video_file, f"{filename}.jpg")
 
+                        up_date = entry.get('upload_date')
+                        ts = entry.get('timestamp')
+                        if up_date and not ts:
+                            try:
+                                ts = int(datetime.strptime(str(up_date).replace('-', ''), "%Y%m%d").timestamp())
+                            except Exception:
+                                pass
+                        formatted_up_date = ""
+                        if ts:
+                            formatted_up_date = datetime.fromtimestamp(ts).strftime("%b %d, %Y")
+                        elif up_date:
+                            s_up = str(up_date).replace('-', '')
+                            formatted_up_date = f"{s_up[:4]}-{s_up[4:6]}-{s_up[6:]}" if len(s_up) == 8 else str(up_date)
+
                         update_file_meta("videos", filename, {
                             "title": title,
                             "youtube_id": v_id,
                             "uploader": ch['name'],
                             "duration": entry.get('duration'),
                             "source_url": f"https://youtube.com/watch?v={v_id}",
+                            "upload_date": up_date,
+                            "timestamp": ts,
+                            "formatted_upload_date": formatted_up_date,
                             "downloaded_at": datetime.now().isoformat()
                         })
                         total_added += 1

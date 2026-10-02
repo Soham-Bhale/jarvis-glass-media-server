@@ -429,6 +429,18 @@ async def list_files(
                 if keyword not in filename.lower() and keyword not in title.lower():
                     continue
 
+            # Prioritize YouTube's real upload timestamp and date over file system mod_time
+            meta_ts = meta_entry.get("timestamp")
+            if not meta_ts and meta_entry.get("upload_date"):
+                try:
+                    meta_ts = int(datetime.strptime(str(meta_entry["upload_date"]).replace("-", ""), "%Y%m%d").timestamp())
+                except Exception:
+                    meta_ts = None
+            effective_upload_ts = meta_ts if meta_ts else mod_time
+            formatted_upload_date = meta_entry.get("formatted_upload_date")
+            if not formatted_upload_date:
+                formatted_upload_date = datetime.fromtimestamp(effective_upload_ts).strftime("%b %d, %Y")
+
             thumb_url = None
             if cat == "videos":
                 thumb_filename = f"{filename}.jpg"
@@ -452,6 +464,8 @@ async def list_files(
                 "size_formatted": format_size(file_size),
                 "modified_timestamp": mod_time,
                 "modified_date": datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M"),
+                "upload_timestamp": effective_upload_ts,
+                "upload_date": formatted_upload_date,
                 "thumbnail_url": thumb_url,
                 "stream_url": f"/api/stream/{cat}/{filename}",
                 "download_url": f"/api/download/{cat}/{filename}",
@@ -462,7 +476,7 @@ async def list_files(
             })
 
     if sort_by == "date_asc":
-        results.sort(key=lambda x: x["modified_timestamp"])
+        results.sort(key=lambda x: x["upload_timestamp"])
     elif sort_by == "name_asc":
         results.sort(key=lambda x: x["title"].lower())
     elif sort_by == "name_desc":
@@ -472,7 +486,7 @@ async def list_files(
     elif sort_by == "size_asc":
         results.sort(key=lambda x: x["size_bytes"])
     else:
-        results.sort(key=lambda x: x["modified_timestamp"], reverse=True)
+        results.sort(key=lambda x: x["upload_timestamp"], reverse=True)
 
     return {"files": results, "total": len(results)}
 
@@ -817,6 +831,20 @@ def run_yt_download_task(task_id: str, url: str, quality: str, limit: int):
                     elif target_cat == "videos":
                         generate_video_thumbnail(saved_path, f"{saved_name}.jpg")
 
+                    up_date = entry.get('upload_date')
+                    ts = entry.get('timestamp')
+                    if up_date and not ts:
+                        try:
+                            ts = int(datetime.strptime(str(up_date).replace('-', ''), "%Y%m%d").timestamp())
+                        except Exception:
+                            pass
+                    formatted_up_date = ""
+                    if ts:
+                        formatted_up_date = datetime.fromtimestamp(ts).strftime("%b %d, %Y")
+                    elif up_date:
+                        s_up = str(up_date).replace('-', '')
+                        formatted_up_date = f"{s_up[:4]}-{s_up[4:6]}-{s_up[6:]}" if len(s_up) == 8 else str(up_date)
+
                     update_file_meta(target_cat, saved_name, {
                         "title": title,
                         "youtube_id": v_id,
@@ -824,6 +852,9 @@ def run_yt_download_task(task_id: str, url: str, quality: str, limit: int):
                         "duration": duration,
                         "thumbnail_url": thumb_url,
                         "source_url": url,
+                        "upload_date": up_date,
+                        "timestamp": ts,
+                        "formatted_upload_date": formatted_up_date,
                         "downloaded_at": datetime.now().isoformat()
                     })
                     count_downloaded += 1
