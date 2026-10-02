@@ -536,23 +536,120 @@
       transform: scale(1.1);
     }
 
-    /* Alternative Grid View */
-    .media-grid-view {
+    /* Netflix Cinema Billboard */
+    .netflix-billboard {
+      position: relative;
+      width: 100%;
+      height: 270px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-bottom: 22px;
+      background: #000;
+      border: 1.5px solid var(--glass-border-strong);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(0, 229, 201, 0.4);
+      cursor: pointer;
       display: none;
+    }
+    .billboard-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.65);
+      transition: transform 0.5s ease;
+    }
+    .netflix-billboard:hover .billboard-img {
+      transform: scale(1.03);
+    }
+    .billboard-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(3, 10, 9, 0.1) 0%, rgba(3, 10, 9, 0.6) 45%, rgba(3, 10, 9, 0.98) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 22px;
+      z-index: 2;
+    }
+    .billboard-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 229, 201, 0.2);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 8px;
+      width: fit-content;
+    }
+    .billboard-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .billboard-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #a1cbc5;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .billboard-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Netflix Grid View (DEFAULT FORMAT) */
+    .media-grid-view {
+      display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 600px) {
+      .media-grid-view {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .netflix-billboard {
+        height: 230px;
+      }
+      .billboard-title {
+        font-size: 16.5px;
+      }
     }
     .media-card {
       background: var(--glass-card);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
       transition: all 0.25s var(--trans-spring);
     }
     .media-card:hover {
       transform: translateY(-4px);
       border-color: var(--accent-cyan);
+      box-shadow: 0 16px 40px rgba(0, 229, 201, 0.2);
     }
     .card-thumb-container {
       position: relative;
@@ -560,6 +657,7 @@
       padding-top: 56.25%;
       background: #000;
       cursor: pointer;
+      overflow: hidden;
     }
     .card-thumb-img {
       position: absolute;
@@ -568,12 +666,24 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .media-card:hover .card-thumb-img {
+      transform: scale(1.04);
     }
     .card-meta-box {
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
+    }
+    .card-upload-info {
+      font-size: 11.5px;
+      color: #7ba8a2;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
     }
 
     /* Floating Navigation Capsule (Image 2 Exact Aesthetic) */
@@ -1053,14 +1163,34 @@
       </div>
     </div>
 
-    <!-- ================= TAB 1: VIDEOS & MEDIA LIST ================= -->
+    <!-- ================= TAB 1: VIDEOS & NETFLIX CINEMA ================= -->
     <div id="tabVideos" class="tab-view active">
 
-      <!-- Main "List" Container (Exact Match of Image 2) -->
+      <!-- Netflix Featured Billboard Banner -->
+      <div class="netflix-billboard" id="netflixBillboard">
+        <img class="billboard-img" id="billboardImg" src="" alt="Featured Video">
+        <div class="billboard-gradient">
+          <div class="billboard-badge">★ FEATURED • NEW</div>
+          <div class="billboard-title" id="billboardTitle">Loading Featured Video...</div>
+          <div class="billboard-meta">
+            <span id="billboardChannel" style="color: var(--accent-cyan); font-weight: 700;">YouTube</span>
+            <span>•</span>
+            <span id="billboardTime">🕒 Uploaded recently</span>
+            <span>•</span>
+            <span id="billboardDuration">--:--</span>
+          </div>
+          <div class="billboard-actions">
+            <button class="glass-btn btn-cyan" id="billboardPlayBtn" style="padding: 8px 18px; font-size: 13px;">▶ Play Now</button>
+            <button class="glass-btn" id="billboardQueueBtn" style="padding: 8px 14px; font-size: 13px;">+ My Queue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Netflix Media Container -->
       <div class="media-list-container">
         
         <div class="list-header-row">
-          <div class="list-title">List</div>
+          <div class="list-title" id="shelfSectionTitle">Netflix Cinema</div>
           <div class="list-header-actions">
             <!-- Sort dropdown pill -->
             <button class="filter-dropdown-pill" onclick="cycleSortMode()">
@@ -1068,8 +1198,8 @@
               <span id="currentSortLabel">Recent ⌄</span>
             </button>
             <!-- View Mode Switcher -->
-            <button class="view-mode-toggle" onclick="toggleViewMode()" title="Toggle List / Card View">
-              <svg id="viewModeIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <button class="view-mode-toggle" onclick="toggleViewMode()" title="Toggle Netflix / List View">
+              <svg id="viewModeIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             </button>
           </div>
         </div>
@@ -1083,14 +1213,14 @@
           <div class="continue-scroll-track" id="continueShelfTrack"></div>
         </div>
 
-        <!-- Media List Rows (Image 2 Match) -->
-        <div class="media-items-list" id="mediaItemsList">
-          <!-- Dynamically populated from /api/files -->
+        <!-- Netflix Grid View (DEFAULT FORMAT!) -->
+        <div class="media-grid-view" id="mediaGridView">
+          <!-- Dynamically populated Netflix cards with upload time and single 3-dots button -->
         </div>
 
-        <!-- Grid View (Optional Toggle) -->
-        <div class="media-grid-view" id="mediaGridView">
-          <!-- Grid items if user toggles view -->
+        <!-- Media List Rows (Compact List Alternative) -->
+        <div class="media-items-list" id="mediaItemsList" style="display: none;">
+          <!-- Dynamically populated from /api/files -->
         </div>
 
       </div>
@@ -1213,8 +1343,8 @@
     <nav class="nav-dock-capsule">
       <!-- Home / Videos Tab -->
       <button class="nav-capsule-item active" onclick="switchTab('videos')" id="navTabVideos">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>List</span>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
+        <span>Netflix</span>
       </button>
 
       <!-- Stats / Drive Tab (Chart Icon like reference) -->
@@ -1373,7 +1503,7 @@
     let cachedQueue = [];
     let cachedHistory = [];
     let qrGenerated = false;
-    let viewMode = "list"; // 'list' or 'grid'
+    let viewMode = "netflix"; // 'netflix' (default cinema format) or 'list'
     let currentSortMode = "recent"; // 'recent', 'name', 'size'
 
     // Selected media for 3-dots drawer
@@ -1396,6 +1526,30 @@
       setInterval(pollHardwareMetrics, 3500);
       setInterval(pollYoutubeTasks, 3500);
     });
+
+    // --- Upload Time Formatter ---
+    function formatUploadTime(timestamp, dateStr) {
+      if (timestamp) {
+        const now = Date.now() / 1000;
+        const diff = Math.max(0, now - timestamp);
+        let rel = "";
+        if (diff < 60) rel = "Just now";
+        else if (diff < 3600) rel = `${Math.floor(diff / 60)}m ago`;
+        else if (diff < 86400) rel = `${Math.floor(diff / 3600)}h ago`;
+        else if (diff < 86400 * 7) rel = `${Math.floor(diff / 86400)}d ago`;
+        else rel = `${Math.floor(diff / (86400 * 30))}mo ago`;
+
+        const d = new Date(timestamp * 1000);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const mon = months[d.getMonth()];
+        const day = d.getDate();
+        const yr = d.getFullYear();
+        const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        return `${mon} ${day}, ${yr} • ${time} (${rel})`;
+      }
+      if (dateStr) return dateStr;
+      return "Recently";
+    }
 
     // --- Search Toggle ---
     function toggleSearch() {
@@ -1428,15 +1582,24 @@
     }
 
     function toggleViewMode() {
-      viewMode = viewMode === "list" ? "grid" : "list";
+      viewMode = viewMode === "netflix" ? "list" : "netflix";
       const icon = document.getElementById("viewModeIcon");
-      if (viewMode === "grid") {
-        document.getElementById("mediaItemsList").style.display = "none";
-        document.getElementById("mediaGridView").style.display = "grid";
+      const listEl = document.getElementById("mediaItemsList");
+      const gridEl = document.getElementById("mediaGridView");
+      const bbEl = document.getElementById("netflixBillboard");
+      const titleEl = document.getElementById("shelfSectionTitle");
+
+      if (viewMode === "netflix") {
+        if (listEl) listEl.style.display = "none";
+        if (gridEl) gridEl.style.display = "grid";
+        if (bbEl && cachedFiles.some(f => f.category === 'videos')) bbEl.style.display = "block";
+        if (titleEl) titleEl.textContent = "Netflix Cinema";
         icon.innerHTML = `<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>`;
       } else {
-        document.getElementById("mediaItemsList").style.display = "flex";
-        document.getElementById("mediaGridView").style.display = "none";
+        if (listEl) listEl.style.display = "flex";
+        if (gridEl) gridEl.style.display = "none";
+        if (bbEl) bbEl.style.display = "none";
+        if (titleEl) titleEl.textContent = "All Videos List";
         icon.innerHTML = `<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>`;
       }
       renderMediaRows(cachedFiles.filter(f => f.category === 'videos'));
@@ -1448,7 +1611,7 @@
       document.querySelectorAll(".nav-capsule-item").forEach(el => el.classList.remove("active"));
 
       const titleMap = {
-        videos: "Statistics",
+        videos: "Netflix Cinema",
         drive: "Drive Storage",
         scraper: "Studio Scraper",
         upload: "Mobile Connect"
@@ -1500,9 +1663,12 @@
     function renderMediaRows(videos) {
       const listContainer = document.getElementById("mediaItemsList");
       const gridContainer = document.getElementById("mediaGridView");
+      const billboard = document.getElementById("netflixBillboard");
+
       if (!videos || videos.length === 0) {
-        listContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px;">No videos found. Tap 🧭 Studio to download from YouTube!</div>`;
-        gridContainer.innerHTML = listContainer.innerHTML;
+        if (listContainer) listContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px;">No videos found. Tap 🧭 Studio to download from YouTube!</div>`;
+        if (gridContainer) gridContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; grid-column: 1/-1;">No videos found. Tap 🧭 Studio to download from YouTube!</div>`;
+        if (billboard) billboard.style.display = "none";
         return;
       }
 
@@ -1514,85 +1680,128 @@
         sorted.sort((a, b) => b.size_bytes - a.size_bytes);
       }
 
-      // Render List View (Image 2 Exact Style)
-      listContainer.innerHTML = sorted.map(vid => {
-        const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=60';
-        const prog = vid.watch_progress;
-        const hasProgress = prog && prog.percent > 2 && !prog.completed;
-        const resumePos = hasProgress ? prog.position_seconds : 0;
-        
-        // Extract channel or subtext
-        let channelName = "YouTube Media";
-        if (vid.title.includes("By ")) {
-          const parts = vid.title.split("By ");
-          channelName = parts[1].split("|")[0].trim();
-        } else if (vid.title.includes("|")) {
-          channelName = vid.title.split("|").pop().trim();
-        }
+      // Populate Netflix Featured Billboard with the top video
+      if (billboard && sorted.length > 0 && viewMode === "netflix") {
+        const feat = sorted[0];
+        const featThumb = feat.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&auto=format&fit=crop&q=80';
+        let featChannel = "YouTube Media";
+        if (feat.title.includes("By ")) featChannel = feat.title.split("By ")[1].split("|")[0].trim();
+        else if (feat.title.includes("|")) featChannel = feat.title.split("|").pop().trim();
 
-        const durationBadge = vid.duration ? formatDuration(vid.duration) : vid.extension.replace('.', '').toUpperCase();
+        const featDuration = feat.duration ? formatDuration(feat.duration) : feat.extension.replace('.', '').toUpperCase();
+        const featUploadTime = formatUploadTime(feat.modified_timestamp, feat.modified_date);
 
-        return `
-          <div class="media-list-row" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${vid.category}', ${resumePos})">
-            <img class="media-row-thumb" src="${thumb}" alt="${vid.title}" loading="lazy">
-            <div class="media-row-info">
-              <div class="media-row-title">${vid.title}</div>
-              <div class="media-row-subtext">${channelName} • ${vid.size_formatted}</div>
-            </div>
-            <div class="media-row-trailing">
-              <span class="media-tag-badge">${durationBadge}</span>
-              <button class="more-options-btn" onclick="openActionDrawer(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumePos})">
-                ⋮
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+        document.getElementById("billboardImg").src = featThumb;
+        document.getElementById("billboardTitle").textContent = feat.title;
+        document.getElementById("billboardChannel").textContent = featChannel;
+        document.getElementById("billboardTime").textContent = `🕒 Uploaded: ${featUploadTime}`;
+        document.getElementById("billboardDuration").textContent = `${featDuration} • ${feat.size_formatted}`;
 
-      // Render Grid View (Alternative)
-      gridContainer.innerHTML = sorted.map(vid => {
-        const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
-        const prog = vid.watch_progress;
-        const resumePos = (prog && prog.percent > 2 && !prog.completed) ? prog.position_seconds : 0;
-        
-        let channelName = "YouTube Media";
-        if (vid.title.includes("By ")) {
-          const parts = vid.title.split("By ");
-          channelName = parts[1].split("|")[0].trim();
-        } else if (vid.title.includes("|")) {
-          channelName = vid.title.split("|").pop().trim();
-        }
-        const durationBadge = vid.duration ? formatDuration(vid.duration) : vid.extension.replace('.', '').toUpperCase();
+        const featProg = feat.watch_progress;
+        const featResume = (featProg && featProg.percent > 2 && !featProg.completed) ? featProg.position_seconds : 0;
 
-        return `
-          <div class="media-card" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${vid.category}', ${resumePos})">
-            <div class="card-thumb-container">
-              <img class="card-thumb-img" src="${thumb}" alt="${vid.title}" loading="lazy">
-              ${durationBadge ? `<span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: var(--accent-cyan); border: 1px solid rgba(0,229,201,0.35); font-size: 11px; padding: 2px 7px; border-radius: 6px; font-weight: 700; z-index: 2;">${durationBadge}</span>` : ''}
-              <button class="more-options-btn" style="position: absolute; top: 8px; right: 8px; background: rgba(8, 28, 25, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(0,229,201,0.45); width: 34px; height: 34px; z-index: 3;" onclick="openActionDrawer(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumePos})">
-                ⋮
-              </button>
-            </div>
-            <div class="card-meta-box">
-              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
-                <div style="font-size: 14.5px; font-weight: 700; color: #fff; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1;" title="${vid.title}">
-                  ${vid.title}
+        document.getElementById("billboardPlayBtn").onclick = (e) => {
+          e.stopPropagation();
+          openVideoPlayer(feat.stream_url, encodeURIComponent(feat.title), feat.size_formatted, feat.download_url, encodeURIComponent(feat.filename), feat.category, featResume);
+        };
+        document.getElementById("billboardQueueBtn").onclick = (e) => {
+          e.stopPropagation();
+          addToQueue(feat.category, encodeURIComponent(feat.filename), encodeURIComponent(feat.title));
+        };
+        billboard.onclick = () => {
+          openVideoPlayer(feat.stream_url, encodeURIComponent(feat.title), feat.size_formatted, feat.download_url, encodeURIComponent(feat.filename), feat.category, featResume);
+        };
+        billboard.style.display = "block";
+      }
+
+      // Render Netflix Grid View (DEFAULT FORMAT: Single 3-dots button, upload time displayed)
+      if (gridContainer) {
+        gridContainer.innerHTML = sorted.map(vid => {
+          const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
+          const prog = vid.watch_progress;
+          const resumePos = (prog && prog.percent > 2 && !prog.completed) ? prog.position_seconds : 0;
+          
+          let channelName = "YouTube Media";
+          if (vid.title.includes("By ")) {
+            const parts = vid.title.split("By ");
+            channelName = parts[1].split("|")[0].trim();
+          } else if (vid.title.includes("|")) {
+            channelName = vid.title.split("|").pop().trim();
+          }
+          const durationBadge = vid.duration ? formatDuration(vid.duration) : vid.extension.replace('.', '').toUpperCase();
+          const uploadTime = formatUploadTime(vid.modified_timestamp, vid.modified_date);
+
+          return `
+            <div class="media-card" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${vid.category}', ${resumePos})">
+              <div class="card-thumb-container">
+                <img class="card-thumb-img" src="${thumb}" alt="${vid.title}" loading="lazy">
+                ${durationBadge ? `<span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.85); color: var(--accent-cyan); border: 1px solid rgba(0,229,201,0.35); font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 700; z-index: 2;">${durationBadge}</span>` : ''}
+              </div>
+              <div class="card-meta-box">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+                  <div class="card-title-text" title="${vid.title}">
+                    ${vid.title}
+                  </div>
+                  <!-- SINGLE 3-DOTS BUTTON -->
+                  <button class="more-options-btn" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="openActionDrawer(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumePos})" title="Options">
+                    ⋮
+                  </button>
                 </div>
-                <button class="more-options-btn" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="openActionDrawer(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumePos})" title="Options">
+                
+                <!-- UPLOAD TIME & DATE DISPLAY -->
+                <div class="card-upload-info" style="font-size: 11.5px; color: var(--accent-cyan); display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                  <span>🕒 Uploaded: ${uploadTime}</span>
+                </div>
+
+                <div class="card-footer-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); margin-top: 6px; border-top: 1px solid rgba(0, 229, 201, 0.12); padding-top: 8px;">
+                  <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 58%;">${channelName} • ${vid.size_formatted}</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <button class="more-options-btn" style="width: 28px; height: 28px; font-size: 12px; font-weight: 700;" onclick="event.stopPropagation(); addToQueue('${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}')" title="Add to Queue">+Q</button>
+                    <a class="more-options-btn" href="${vid.download_url}" download onclick="event.stopPropagation()" style="width: 28px; height: 28px; font-size: 13px; text-decoration: none;" title="Download">⬇</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render List View (Compact alternative when user toggles)
+      if (listContainer) {
+        listContainer.innerHTML = sorted.map(vid => {
+          const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=60';
+          const prog = vid.watch_progress;
+          const hasProgress = prog && prog.percent > 2 && !prog.completed;
+          const resumePos = hasProgress ? prog.position_seconds : 0;
+          
+          let channelName = "YouTube Media";
+          if (vid.title.includes("By ")) {
+            const parts = vid.title.split("By ");
+            channelName = parts[1].split("|")[0].trim();
+          } else if (vid.title.includes("|")) {
+            channelName = vid.title.split("|").pop().trim();
+          }
+
+          const durationBadge = vid.duration ? formatDuration(vid.duration) : vid.extension.replace('.', '').toUpperCase();
+          const uploadTime = formatUploadTime(vid.modified_timestamp, vid.modified_date);
+
+          return `
+            <div class="media-list-row" onclick="openVideoPlayer('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${vid.category}', ${resumePos})">
+              <img class="media-row-thumb" src="${thumb}" alt="${vid.title}" loading="lazy">
+              <div class="media-row-info">
+                <div class="media-row-title">${vid.title}</div>
+                <div class="media-row-subtext">${channelName} • ${vid.size_formatted} • 🕒 ${uploadTime}</div>
+              </div>
+              <div class="media-row-trailing">
+                <span class="media-tag-badge">${durationBadge}</span>
+                <button class="more-options-btn" onclick="openActionDrawer(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumePos})">
                   ⋮
                 </button>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); margin-top: 6px; border-top: 1px solid rgba(0, 229, 201, 0.12); padding-top: 8px;">
-                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;">${channelName} • ${vid.size_formatted}</span>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <button class="more-options-btn" style="width: 28px; height: 28px; font-size: 12px; font-weight: 700;" onclick="event.stopPropagation(); addToQueue('${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}')" title="Add to Queue">+Q</button>
-                  <a class="more-options-btn" href="${vid.download_url}" download onclick="event.stopPropagation()" style="width: 28px; height: 28px; font-size: 13px; text-decoration: none;" title="Download">⬇</a>
-                </div>
-              </div>
             </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
     }
 
     function renderDriveItems(files) {
