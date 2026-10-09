@@ -558,33 +558,48 @@ async def get_playback_queue():
 async def add_to_playback_queue(
     category: str = Form("videos"),
     filename: str = Form(...),
-    play_next: bool = Form(False)
+    play_next: bool = Form(False),
+    insert_after_key: Optional[str] = Form(None)
 ):
     q = load_playback_queue()
     key = f"{category}/{filename}"
+    
+    # Extract existing entry if already in queue so we can preserve metadata
+    existing = next((item for item in q if item.get("key") == key), None)
     q = [item for item in q if item.get("key") != key]
 
-    metadata = load_metadata().get(key, {})
-    title = metadata.get("title", filename)
-    thumb_url = f"/api/thumbnails/{filename}.jpg" if os.path.exists(os.path.join(THUMBNAILS_DIR, f"{filename}.jpg")) else metadata.get("thumbnail_url")
-    uploader = metadata.get("uploader", "YouTube Media")
-    duration = metadata.get("duration", 0)
+    if existing:
+        entry = existing
+        title = entry.get("title", filename)
+    else:
+        metadata = load_metadata().get(key, {})
+        title = metadata.get("title", filename)
+        thumb_url = f"/api/thumbnails/{filename}.jpg" if os.path.exists(os.path.join(THUMBNAILS_DIR, f"{filename}.jpg")) else metadata.get("thumbnail_url")
+        uploader = metadata.get("uploader", "YouTube Media")
+        duration = metadata.get("duration", 0)
 
-    entry = {
-        "key": key,
-        "category": category,
-        "filename": filename,
-        "title": title,
-        "uploader": uploader,
-        "duration": duration,
-        "thumbnail_url": thumb_url,
-        "stream_url": f"/api/stream/{category}/{filename}",
-        "download_url": f"/api/download/{category}/{filename}",
-        "added_at": datetime.now().strftime("%H:%M:%S")
-    }
+        entry = {
+            "key": key,
+            "category": category,
+            "filename": filename,
+            "title": title,
+            "uploader": uploader,
+            "duration": duration,
+            "thumbnail_url": thumb_url,
+            "stream_url": f"/api/stream/{category}/{filename}",
+            "download_url": f"/api/download/{category}/{filename}",
+            "added_at": datetime.now().strftime("%H:%M:%S")
+        }
 
     if play_next:
-        q.insert(0, entry)
+        if insert_after_key:
+            after_idx = next((i for i, item in enumerate(q) if item.get("key") == insert_after_key), -1)
+            if after_idx >= 0:
+                q.insert(after_idx + 1, entry)
+            else:
+                q.insert(0, entry)
+        else:
+            q.insert(0, entry)
         msg = f"'{title}' will play next"
     else:
         q.append(entry)

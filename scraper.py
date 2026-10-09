@@ -5,6 +5,57 @@ from datetime import datetime
 import yt_dlp
 from app import CATEGORIES, THUMBNAILS_DIR, update_file_meta, generate_video_thumbnail, load_channels
 
+def deduplicate_videos():
+    """Remove older duplicate videos for the same YouTube ID, keeping the newest."""
+    import re
+    videos_dir = CATEGORIES['videos']
+    # Map: youtube_id -> list of (filepath, mtime, fname)
+    id_map = {}
+    for fname in os.listdir(videos_dir):
+        fpath = os.path.join(videos_dir, fname)
+        if not os.path.isfile(fpath):
+            continue
+        ext = os.path.splitext(fname)[1].lower()
+        if ext not in ['.mp4', '.webm', '.mkv', '.mov', '.avi', '.m4v']:
+            continue
+        # Extract YouTube ID from filename pattern: title_YTID.ext
+        match = re.search(r'_([A-Za-z0-9_-]{11})\.[a-z0-9]+$', fname)
+        if match:
+            yt_id = match.group(1)
+            mtime = os.path.getmtime(fpath)
+            if yt_id not in id_map:
+                id_map[yt_id] = []
+            id_map[yt_id].append((fpath, mtime, fname))
+
+    removed = 0
+    for yt_id, entries in id_map.items():
+        if len(entries) <= 1:
+            continue
+        # Sort by mtime descending, keep newest
+        entries.sort(key=lambda x: x[1], reverse=True)
+        for fpath, mtime, fname in entries[1:]:  # Delete all but newest
+            try:
+                os.remove(fpath)
+                print(f'  [dedup] Removed older duplicate: {fname}')
+                # Remove thumbnail
+                thumb = os.path.join(THUMBNAILS_DIR, f'{fname}.jpg')
+                if os.path.exists(thumb):
+                    os.remove(thumb)
+                # Remove metadata
+                from app import load_metadata, save_metadata
+                meta = load_metadata()
+                key = f'videos/{fname}'
+                if key in meta:
+                    del meta[key]
+                    save_metadata(meta)
+                removed += 1
+            except Exception as e:
+                print(f'  [dedup] Error removing {fname}: {e}')
+    if removed > 0:
+        print(f'  [dedup] Cleaned up {removed} duplicate video(s).')
+    return removed
+
+
 def scrape_youtube_channels(limit_per_channel=4, quality="720"):
     try:
         import sys
@@ -105,6 +156,8 @@ def scrape_youtube_channels(limit_per_channel=4, quality="720"):
 
     print("\n" + "=" * 60)
     print(f"✅ Scraping Complete! Added {total_added} videos to media library.")
+    print("[*] Running deduplication pass...")
+    deduplicate_videos()
     print("=" * 60)
 
 if __name__ == "__main__":

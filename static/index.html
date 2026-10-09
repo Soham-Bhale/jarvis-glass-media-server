@@ -824,6 +824,10 @@
       background: rgba(0, 229, 201, 0.12);
       border-color: rgba(0, 229, 201, 0.4);
     }
+    .yt-card.active-playing-card {
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(0, 229, 201, 0.25);
+    }
     .queue-reorder-btns {
       display: flex;
       flex-direction: column;
@@ -1153,6 +1157,7 @@
     <div class="yt-chip" onclick="filterByChannel('DefenceSquad', this)">DefenceSquad</div>
     <div class="yt-chip" onclick="filterBySpecial('continue', this)">Continue Watching</div>
     <div class="yt-chip" onclick="filterBySpecial('queue', this)">Queue (<span id="chipQueueCount">0</span>)</div>
+    <div class="yt-chip" onclick="filterBySpecial('myfiles', this)">📁 My Files</div>
     <div class="yt-chip" onclick="openChannelManager()">+ Add Channel</div>
   </div>
 
@@ -1484,10 +1489,26 @@
     let cachedFiles = [];
     let cachedChannels = [];
     let cachedQueue = [];
+    let currentQueueIndex = -1;
     let cachedHistory = [];
     let activeFilter = "";
     let selectedMenuMedia = null;
     let qrRendered = false;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function safeEnc(str) {
+      if (!str) return '';
+      return encodeURIComponent(str).replace(/'/g, "%27");
+    }
 
     // Player State
     let currentVideoMeta = {
@@ -1623,6 +1644,7 @@
       }
 
       container.innerHTML = filtered.map(vid => {
+        const originalIdx = cachedFiles.findIndex(f => f.filename === vid.filename);
         const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
         const prog = vid.watch_progress;
         const hasProgress = prog && prog.percent > 2 && !prog.completed;
@@ -1635,15 +1657,15 @@
         const av = getChannelAvatar(channel);
 
         return `
-          <div class="yt-card" onclick="startPlayback('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', ${resumeSec}, ${vid.upload_timestamp || 0})">
+          <div class="yt-card" onclick="playCachedFileIndex(${originalIdx})">
             <!-- 16:9 Thumbnail -->
             <div class="yt-thumb-wrap">
-              <img class="yt-thumb-img" src="${thumb}" alt="${vid.title}" loading="lazy">
+              <img class="yt-thumb-img" src="${thumb}" alt="${escapeHtml(vid.title)}" loading="lazy">
               ${durationStr ? `<span class="yt-duration-badge">${durationStr}</span>` : ''}
               ${progressPct > 0 ? `<div class="yt-progress-bar" style="width: ${progressPct}%;"></div>` : ''}
 
               <!-- Quick Queue Pill on Hover -->
-              <div class="yt-quick-queue-btn" onclick="event.stopPropagation(); addToQueueDirect('${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}')">
+              <div class="yt-quick-queue-btn" onclick="event.stopPropagation(); addToQueueByIndex(${originalIdx})">
                 <span>➕ Queue</span>
               </div>
             </div>
@@ -1653,11 +1675,11 @@
               <div class="yt-channel-avatar ${av.colorClass}">${av.letter}</div>
               
               <div class="yt-meta-col">
-                <div class="yt-video-title" title="${vid.title}">
-                  ${vid.title}
+                <div class="yt-video-title" title="${escapeHtml(vid.title)}">
+                  ${escapeHtml(vid.title)}
                 </div>
                 <div class="yt-channel-name">
-                  <span>${channel}</span>
+                  <span>${escapeHtml(channel)}</span>
                   <span class="yt-verified-badge" title="Verified">✓</span>
                 </div>
                 <!-- YouTube Upload Date Display -->
@@ -1669,7 +1691,7 @@
               </div>
 
               <!-- SINGLE 3-DOTS BUTTON -->
-              <button class="yt-dots-btn" onclick="openContextMenu(event, '${vid.category}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(vid.title)}', '${vid.download_url}', '${vid.stream_url}', ${resumeSec})" title="Options">
+              <button class="yt-dots-btn" onclick="openContextMenuByIndex(event, ${originalIdx})" title="Options">
                 ⋮
               </button>
             </div>
@@ -1694,6 +1716,7 @@
       shelf.style.display = "block";
 
       container.innerHTML = inProgress.map(vid => {
+        const originalIdx = cachedFiles.findIndex(f => f.filename === vid.filename);
         const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=60';
         const prog = vid.watch_progress;
         const progressPct = prog ? prog.percent : 0;
@@ -1701,14 +1724,14 @@
         const channel = vid.uploader || "YouTube";
 
         return `
-          <div style="flex: 0 0 260px; cursor: pointer;" onclick="startPlayback('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', ${resumeSec}, ${vid.upload_timestamp || 0})">
+          <div style="flex: 0 0 260px; cursor: pointer;" onclick="playCachedFileIndex(${originalIdx})">
             <div class="yt-thumb-wrap" style="aspect-ratio: 16/9; margin-bottom: 8px;">
               <img class="yt-thumb-img" src="${thumb}">
               <div class="yt-progress-bar" style="width: ${progressPct}%;"></div>
               <span class="yt-duration-badge">${Math.round(progressPct)}%</span>
             </div>
-            <div style="font-size: 13.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${vid.title}</div>
-            <div style="font-size: 12px; color: var(--yt-text-secondary); margin-top: 2px;">${channel} • Resume at ${formatDuration(resumeSec)}</div>
+            <div style="font-size: 13.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(vid.title)}</div>
+            <div style="font-size: 12px; color: var(--yt-text-secondary); margin-top: 2px;">${escapeHtml(channel)} • Resume at ${formatDuration(resumeSec)}</div>
           </div>
         `;
       }).join('');
@@ -1730,37 +1753,44 @@
         const inProg = cachedFiles.filter(v => v.watch_progress && v.watch_progress.percent > 2 && !v.watch_progress.completed);
         document.getElementById("gridSectionTitle").textContent = "Continue Watching";
         document.getElementById("gridTotalCount").textContent = `${inProg.length} video(s)`;
-        renderCustomVideoList(inProg);
+        renderCustomVideoList(inProg, false);
       } else if (type === 'queue') {
         document.getElementById("gridSectionTitle").textContent = "Playback Queue";
         document.getElementById("gridTotalCount").textContent = `${cachedQueue.length} video(s)`;
-        renderCustomVideoList(cachedQueue);
+        renderCustomVideoList(cachedQueue, true);
+      } else if (type === 'myfiles') {
+        document.getElementById("gridSectionTitle").textContent = "My Files (Cloud Drive)";
+        document.getElementById("gridTotalCount").textContent = "Loading...";
+        fetchAndRenderDriveFiles();
       }
     }
 
-    function renderCustomVideoList(list) {
+    function renderCustomVideoList(list, isQueue = false) {
       const container = document.getElementById("videoGrid");
       if (list.length === 0) {
         container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--yt-text-muted);">No videos in this section.</div>`;
         return;
       }
-      container.innerHTML = list.map(vid => {
+      container.innerHTML = list.map((vid, idx) => {
         const thumb = vid.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60';
         const channel = vid.uploader || "YouTube Media";
         const av = getChannelAvatar(channel);
-        const uploadDateStr = formatYouTubeDate(vid.upload_timestamp, vid.upload_date);
+        const uploadDateStr = vid.upload_timestamp ? formatYouTubeDate(vid.upload_timestamp, vid.upload_date) : (vid.added_at ? `Queued at ${vid.added_at}` : "");
+        const originalIdx = cachedFiles.findIndex(f => f.filename === vid.filename);
+        const clickAction = isQueue ? `playQueueIndex(${idx})` : `playCachedFileIndex(${originalIdx >= 0 ? originalIdx : 0})`;
 
         return `
-          <div class="yt-card" onclick="startPlayback('${vid.stream_url}', '${encodeURIComponent(vid.title)}', '${vid.size_formatted || ''}', '${vid.download_url}', '${encodeURIComponent(vid.filename)}', '${encodeURIComponent(channel)}', 0, ${vid.upload_timestamp || 0})">
+          <div class="yt-card" onclick="${clickAction}">
             <div class="yt-thumb-wrap">
               <img class="yt-thumb-img" src="${thumb}">
               ${vid.duration ? `<span class="yt-duration-badge">${formatDuration(vid.duration)}</span>` : ''}
+              ${isQueue ? `<div class="yt-quick-queue-btn" style="opacity: 1;" onclick="event.stopPropagation(); removeQueueItemByIndex(${idx})"><span>✕ Remove</span></div>` : ''}
             </div>
             <div class="yt-card-details">
               <div class="yt-channel-avatar ${av.colorClass}">${av.letter}</div>
               <div class="yt-meta-col">
-                <div class="yt-video-title">${vid.title}</div>
-                <div class="yt-channel-name">${channel}</div>
+                <div class="yt-video-title">${isQueue ? `<span style="color: var(--accent-cyan); font-weight: 700;">#${idx + 1} </span>` : ''}${escapeHtml(vid.title)}</div>
+                <div class="yt-channel-name">${escapeHtml(channel)}</div>
                 <div class="yt-upload-info"><span class="highlight-date">${uploadDateStr}</span></div>
               </div>
             </div>
@@ -1773,15 +1803,142 @@
       renderVideoGrid();
     }
 
+    async function fetchAndRenderDriveFiles() {
+      try {
+        const container = document.getElementById('videoGrid');
+        const titleEl = document.getElementById('gridSectionTitle');
+        const countEl = document.getElementById('gridTotalCount');
+        titleEl.textContent = 'My Files (Cloud Drive)';
+        countEl.textContent = 'Loading...';
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--yt-text-muted);">Loading files...</div>';
+
+        const res = await fetch('/api/files');
+        const data = await res.json();
+        const nonVideoCats = ['photos', 'audio', 'documents', 'files'];
+        const driveFiles = (data.files || []).filter(f => nonVideoCats.includes(f.category));
+        countEl.textContent = `${driveFiles.length} file(s) uploaded`;
+
+        if (driveFiles.length === 0) {
+          container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--yt-text-muted);"><div style="font-size:48px;margin-bottom:10px;">☁️</div><div style="font-size:16px;font-weight:600;">No uploaded files yet.</div><p style="font-size:13px;margin-top:6px;">Click the upload icon to send files from your phone.</p></div>`;
+          return;
+        }
+
+        function getFileEmoji(ext) {
+          if (['.jpg','.jpeg','.png','.gif','.webp','.bmp','.heic'].includes(ext)) return '🖼️';
+          if (['.mp3','.wav','.m4a','.flac','.aac','.ogg','.opus'].includes(ext)) return '🎵';
+          if (['.pdf'].includes(ext)) return '📄';
+          if (['.doc','.docx'].includes(ext)) return '📝';
+          if (['.xls','.xlsx'].includes(ext)) return '📊';
+          if (['.ppt','.pptx'].includes(ext)) return '📊';
+          if (['.txt','.md'].includes(ext)) return '📃';
+          return '📁';
+        }
+
+        container.innerHTML = driveFiles.map(f => {
+          const emoji = getFileEmoji(f.extension);
+          const isPhoto = f.category === 'photos';
+          const isAudio = f.category === 'audio';
+          const clickAction = isPhoto
+            ? `openPhotoViewer('${f.stream_url}', '${escapeHtml(f.title)}')`
+            : isAudio
+            ? `openAudioPlayer('${f.stream_url}', '${escapeHtml(f.title)}', '${escapeHtml(f.filename)}')`
+            : `window.open('${f.download_url}', '_blank')`;
+
+          return `
+            <div class="yt-card" onclick="${clickAction}">
+              <div class="yt-thumb-wrap" style="background: #1a1a2e; display:flex; align-items:center; justify-content:center; font-size: 52px;">
+                ${isPhoto ? `<img class="yt-thumb-img" src="${f.stream_url}" alt="${escapeHtml(f.title)}" loading="lazy">` : `<span>${emoji}</span>`}
+              </div>
+              <div class="yt-card-details">
+                <div class="yt-channel-avatar" style="background: #2a2a4a; color: #aaa; font-size:16px;">${emoji}</div>
+                <div class="yt-meta-col">
+                  <div class="yt-video-title" title="${escapeHtml(f.filename)}">${escapeHtml(f.title || f.filename)}</div>
+                  <div class="yt-channel-name">${f.category} • ${f.extension}</div>
+                  <div class="yt-upload-info"><span class="highlight-date">${f.upload_date || f.modified_date}</span><span>•</span><span>${f.size_formatted}</span></div>
+                </div>
+                <a class="yt-dots-btn" href="${f.download_url}" download="${escapeHtml(f.filename)}" onclick="event.stopPropagation()" title="Download">⬇</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        showToast('Error loading drive files: ' + e);
+      }
+    }
+
+    function openPhotoViewer(url, title) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:800;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+      overlay.innerHTML = `<div style="position:relative;max-width:95vw;max-height:95vh;"><img src="${url}" style="max-width:95vw;max-height:90vh;border-radius:8px;object-fit:contain;"><div style="position:absolute;top:-40px;left:0;right:0;text-align:center;color:#fff;font-size:14px;font-weight:600;">${escapeHtml(title)}</div><button onclick="event.stopPropagation();this.closest('div').parentElement.remove()" style="position:absolute;top:-36px;right:0;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:13px;">✕ Close</button></div>`;
+      overlay.onclick = () => overlay.remove();
+      document.body.appendChild(overlay);
+    }
+
+    function openAudioPlayer(url, title, filename) {
+      const existing = document.getElementById('audioPlayerOverlay');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'audioPlayerOverlay';
+      overlay.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e1e1e;border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px 20px;z-index:500;min-width:320px;max-width:90vw;box-shadow:0 20px 50px rgba(0,0,0,0.8);';
+      overlay.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;color:#fff;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🎵 ${escapeHtml(title)}</div>
+          <button onclick="document.getElementById('audioPlayerOverlay').remove()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:4px 10px;border-radius:20px;cursor:pointer;font-size:12px;">✕</button>
+        </div>
+        <audio controls autoplay style="width:100%;accent-color:var(--accent-cyan);" src="${url}"></audio>
+      `;
+      document.body.appendChild(overlay);
+    }
+
     // --- 4. Single 3-Dots Context Menu Popover ---
+    function openContextMenuByIndex(event, idx) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const vid = cachedFiles[idx];
+      if (!vid) return;
+
+      const prog = vid.watch_progress;
+      selectedMenuMedia = {
+        category: vid.category || "videos",
+        filename: vid.filename,
+        title: vid.title,
+        downloadUrl: vid.download_url,
+        streamUrl: vid.stream_url,
+        resumeSec: prog ? prog.position_seconds : 0
+      };
+
+      const menu = document.getElementById("contextMenu");
+      const backdrop = document.getElementById("menuBackdrop");
+      const dlLink = document.getElementById("menuDownloadLink");
+
+      dlLink.href = vid.download_url;
+      dlLink.download = vid.filename;
+
+      const clickX = event.clientX;
+      const clickY = event.clientY;
+      const menuWidth = 220;
+      const left = (clickX + menuWidth > window.innerWidth) ? (clickX - menuWidth) : clickX;
+
+      menu.style.top = `${clickY + 10}px`;
+      menu.style.left = `${Math.max(10, left)}px`;
+      menu.style.display = "block";
+      backdrop.style.display = "block";
+    }
+
     function openContextMenu(event, category, encFilename, encTitle, downloadUrl, streamUrl, resumeSec) {
       event.stopPropagation();
       event.preventDefault();
 
+      let filename = encFilename;
+      try { filename = decodeURIComponent(encFilename); } catch (e) {}
+      let title = encTitle;
+      try { title = decodeURIComponent(encTitle); } catch (e) {}
+
       selectedMenuMedia = {
         category,
-        filename: decodeURIComponent(encFilename),
-        title: decodeURIComponent(encTitle),
+        filename,
+        title,
         downloadUrl,
         streamUrl,
         resumeSec
@@ -1815,21 +1972,26 @@
       if (!selectedMenuMedia) return;
       const m = selectedMenuMedia;
       closeContextMenu();
-      startPlayback(m.streamUrl, encodeURIComponent(m.title), "", m.downloadUrl, encodeURIComponent(m.filename), "YouTube", m.resumeSec || 0, 0);
+      const idx = cachedFiles.findIndex(f => f.filename === m.filename);
+      if (idx >= 0) {
+        playCachedFileIndex(idx);
+      } else {
+        startPlayback(m.streamUrl, m.title, "", m.downloadUrl, m.filename, "YouTube", m.resumeSec || 0, 0);
+      }
     }
 
     function menuActionPlayNext() {
       if (!selectedMenuMedia) return;
       const m = selectedMenuMedia;
       closeContextMenu();
-      addToQueueDirect(m.category, encodeURIComponent(m.filename), encodeURIComponent(m.title), true);
+      addToQueueDirect(m.category, m.filename, m.title, true);
     }
 
     function menuActionAddQueue() {
       if (!selectedMenuMedia) return;
       const m = selectedMenuMedia;
       closeContextMenu();
-      addToQueueDirect(m.category, encodeURIComponent(m.filename), encodeURIComponent(m.title), false);
+      addToQueueDirect(m.category, m.filename, m.title, false);
     }
 
     async function menuActionDelete() {
@@ -1849,11 +2011,14 @@
     }
 
     // --- 5. Unified Video Playback Engine (Theater & Pop-up Window) ---
-    function startPlayback(streamUrl, encTitle, sizeStr, downloadUrl, encFilename, encChannel, resumePos = 0, uploadTs = 0) {
+    function startPlayback(streamUrl, encTitle, sizeStr, downloadUrl, encFilename, encChannel, resumePos = 0, uploadTs = 0, thumbUrl = "") {
       const player = document.getElementById("activeVideoPlayer");
-      const title = decodeURIComponent(encTitle);
-      const filename = decodeURIComponent(encFilename);
-      const channel = decodeURIComponent(encChannel || "YouTube");
+      let title = encTitle || "";
+      try { title = decodeURIComponent(encTitle); } catch (e) {}
+      let filename = encFilename || "";
+      try { filename = decodeURIComponent(encFilename); } catch (e) {}
+      let channel = encChannel || "YouTube";
+      try { channel = decodeURIComponent(encChannel); } catch (e) {}
 
       currentVideoMeta = {
         filename,
@@ -1863,8 +2028,18 @@
         streamUrl,
         downloadUrl,
         duration: 0,
-        uploadTs
+        uploadTs,
+        thumbnail_url: thumbUrl || ""
       };
+
+      // Sync currentQueueIndex: if caller already set it (via playQueueIndex), keep it.
+      // Otherwise compute from filename.
+      const _qIdx = cachedQueue.findIndex(it => it.filename === filename);
+      if (_qIdx >= 0) {
+        currentQueueIndex = _qIdx;
+      } else {
+        currentQueueIndex = -1;
+      }
 
       // Set titles
       document.getElementById("watchModalTitle").textContent = title;
@@ -2039,9 +2214,18 @@
 
     function togglePlayPause() {
       const player = document.getElementById("activeVideoPlayer");
-      if (!player.src) return;
+      if (!player.src || player.src === window.location.href || player.src.endsWith("#")) {
+        if (cachedQueue.length > 0) {
+          playQueueIndex(0);
+          return;
+        } else if (cachedFiles.length > 0) {
+          playCachedFileIndex(0);
+          return;
+        }
+        return;
+      }
       if (player.paused) {
-        player.play();
+        player.play().catch(() => {});
       } else {
         player.pause();
       }
@@ -2185,6 +2369,9 @@
         const res = await fetch("/api/queue");
         const data = await res.json();
         cachedQueue = data.queue || [];
+        if (currentVideoMeta.filename) {
+          currentQueueIndex = cachedQueue.findIndex(it => it.filename === currentVideoMeta.filename);
+        }
         updateQueueCounts();
         renderQueueList();
         updateQueueBarState();
@@ -2195,84 +2382,185 @@
 
     function updateQueueCounts() {
       const len = cachedQueue.length;
-      document.getElementById("chipQueueCount").textContent = len;
-      document.getElementById("navQueueCount").textContent = len;
-      document.getElementById("theaterQueueCount").textContent = len;
-      document.getElementById("drawerQueueCounter").textContent = `${len} video${len === 1 ? '' : 's'}`;
+      const chipEl = document.getElementById("chipQueueCount");
+      if (chipEl) chipEl.textContent = len;
+      const navEl = document.getElementById("navQueueCount");
+      if (navEl) navEl.textContent = len;
+      const thEl = document.getElementById("theaterQueueCount");
+      if (thEl) thEl.textContent = len;
+      const drEl = document.getElementById("drawerQueueCounter");
+      if (drEl) drEl.textContent = `${len} video${len === 1 ? '' : 's'}`;
     }
 
-    async function addToQueueDirect(category, encFilename, encTitle, playNext = false) {
-      const filename = decodeURIComponent(encFilename);
-      const title = decodeURIComponent(encTitle);
+    async function addToQueueDirect(category, rawFilename, rawTitle, playNext = false) {
+      let filename = rawFilename;
+      try { filename = decodeURIComponent(rawFilename); } catch (e) {}
+      let title = rawTitle;
+      try { title = decodeURIComponent(rawTitle); } catch (e) {}
 
       try {
         const fd = new FormData();
-        fd.append("category", category);
+        fd.append("category", category || "videos");
         fd.append("filename", filename);
         fd.append("play_next", playNext);
+        if (playNext && currentQueueIndex >= 0 && currentQueueIndex < cachedQueue.length) {
+          fd.append("insert_after_key", cachedQueue[currentQueueIndex].key);
+        }
 
         const res = await fetch("/api/queue/add", { method: "POST", body: fd });
         const data = await res.json();
         showToast(data.message || (playNext ? `Will play next: "${title}"` : `Added to queue: "${title}"`));
-        fetchPlaybackQueue();
+        await fetchPlaybackQueue();
       } catch (e) {
         showToast("Error adding to queue: " + e);
       }
     }
 
+    function addToQueueByIndex(idx, playNext = false) {
+      const vid = cachedFiles[idx];
+      if (!vid) return;
+      addToQueueDirect(vid.category, vid.filename, vid.title, playNext);
+    }
+
+    function playQueueIndex(idx) {
+      if (idx < 0 || idx >= cachedQueue.length) return;
+      currentQueueIndex = idx;
+      const item = cachedQueue[idx];
+      startPlayback(
+        item.stream_url,
+        item.title,
+        "",
+        item.download_url,
+        item.filename,
+        item.uploader || "YouTube",
+        0,
+        0,
+        item.thumbnail_url || ""
+      );
+    }
+
+    function playCachedFileIndex(idx) {
+      if (idx < 0 || idx >= cachedFiles.length) return;
+      const vid = cachedFiles[idx];
+      const prog = vid.watch_progress;
+      const resumeSec = prog ? prog.position_seconds : 0;
+      currentQueueIndex = cachedQueue.findIndex(it => it.filename === vid.filename);
+      startPlayback(
+        vid.stream_url,
+        vid.title,
+        vid.size_formatted || '',
+        vid.download_url,
+        vid.filename,
+        vid.uploader || 'YouTube Channel',
+        resumeSec,
+        vid.upload_timestamp || 0,
+        vid.thumbnail_url || ''
+      );
+    }
+
     function playNextVideo() {
+      // PRIMARY: If current video is tracked in the queue, advance within queue
+      if (currentQueueIndex >= 0 && cachedQueue.length > 0) {
+        const nextIdx = currentQueueIndex + 1;
+        if (nextIdx < cachedQueue.length) {
+          playQueueIndex(nextIdx);
+        } else if (isLoopQueue) {
+          showToast('Looping queue from beginning');
+          playQueueIndex(0);
+        } else {
+          showToast('End of playback queue.');
+        }
+        return;
+      }
+      // SECONDARY: Queue has items but current video is not in it → play queue top
       if (cachedQueue.length > 0) {
-        const next = cachedQueue.shift();
-        removeQueueItemRemote(next.key);
-        startPlayback(next.stream_url, encodeURIComponent(next.title), "", next.download_url, encodeURIComponent(next.filename), encodeURIComponent(next.uploader || 'YouTube'), 0, 0);
+        playQueueIndex(0);
         return;
       }
-
-      // If loop queue is on, replay from cachedFiles
-      if (isLoopQueue && cachedFiles.length > 0) {
-        const first = cachedFiles[0];
-        startPlayback(first.stream_url, encodeURIComponent(first.title), first.size_formatted, first.download_url, encodeURIComponent(first.filename), encodeURIComponent(first.uploader || 'YouTube'), 0, first.upload_timestamp || 0);
-        return;
-      }
-
-      // Next in cachedFiles
+      // FALLBACK: No queue → navigate file library
       const idx = cachedFiles.findIndex(f => f.filename === currentVideoMeta.filename);
       if (idx >= 0 && idx + 1 < cachedFiles.length) {
-        const next = cachedFiles[idx + 1];
-        startPlayback(next.stream_url, encodeURIComponent(next.title), next.size_formatted, next.download_url, encodeURIComponent(next.filename), encodeURIComponent(next.uploader || 'YouTube'), 0, next.upload_timestamp || 0);
+        playCachedFileIndex(idx + 1);
+      } else if (isLoopQueue && cachedFiles.length > 0) {
+        playCachedFileIndex(0);
       } else {
-        showToast("End of queue.");
+        showToast('End of playlist.');
       }
     }
 
     function playPreviousVideo() {
+      const player = document.getElementById("activeVideoPlayer");
+      // If > 3s into video, restart current
+      if (player && player.currentTime > 3) {
+        player.currentTime = 0;
+        player.play().catch(() => {});
+        return;
+      }
+      // PRIMARY: If current video is in the queue, go back within queue
+      if (currentQueueIndex > 0 && cachedQueue.length > 0) {
+        playQueueIndex(currentQueueIndex - 1);
+        return;
+      } else if (currentQueueIndex === 0) {
+        if (isLoopQueue && cachedQueue.length > 1) {
+          playQueueIndex(cachedQueue.length - 1);
+        } else {
+          showToast('At beginning of queue.');
+        }
+        return;
+      }
+      // FALLBACK: Navigate file library
       const idx = cachedFiles.findIndex(f => f.filename === currentVideoMeta.filename);
       if (idx > 0) {
-        const prev = cachedFiles[idx - 1];
-        startPlayback(prev.stream_url, encodeURIComponent(prev.title), prev.size_formatted, prev.download_url, encodeURIComponent(prev.filename), encodeURIComponent(prev.uploader || 'YouTube'), 0, prev.upload_timestamp || 0);
+        playCachedFileIndex(idx - 1);
       } else {
-        showToast("No previous video.");
+        showToast('No previous video.');
       }
     }
 
     function queueCurrentVideo() {
-      const vid = cachedFiles.find(f => f.filename === currentVideoMeta.filename);
-      if (vid) {
-        addToQueueDirect(vid.category, encodeURIComponent(vid.filename), encodeURIComponent(vid.title), false);
+      if (!currentVideoMeta.filename) {
+        showToast("No video currently active.");
+        return;
       }
+      addToQueueDirect(currentVideoMeta.category || "videos", currentVideoMeta.filename, currentVideoMeta.title, false);
     }
 
-    async function moveQueueItem(key, direction) {
+    async function moveQueueItemByIndex(idx, direction) {
+      const item = cachedQueue[idx];
+      if (!item) return;
       try {
         const fd = new FormData();
-        fd.append("key", key);
+        fd.append("key", item.key);
         fd.append("direction", direction);
         const res = await fetch("/api/queue/move", { method: "POST", body: fd });
         const data = await res.json();
         cachedQueue = data.queue || [];
+        if (currentVideoMeta.filename) {
+          currentQueueIndex = cachedQueue.findIndex(it => it.filename === currentVideoMeta.filename);
+        }
         renderQueueList();
       } catch (e) {
         console.error("Error moving queue item:", e);
+      }
+    }
+
+    async function removeQueueItemByIndex(idx) {
+      const item = cachedQueue[idx];
+      if (!item) return;
+      try {
+        const fd = new FormData();
+        fd.append("key", item.key);
+        const res = await fetch("/api/queue/remove", { method: "POST", body: fd });
+        const data = await res.json();
+        cachedQueue = data.queue || [];
+        if (currentVideoMeta.filename) {
+          currentQueueIndex = cachedQueue.findIndex(it => it.filename === currentVideoMeta.filename);
+        }
+        updateQueueCounts();
+        renderQueueList();
+        updateQueueBarState();
+      } catch (e) {
+        console.error("Error removing from queue:", e);
       }
     }
 
@@ -2283,6 +2571,9 @@
         const res = await fetch("/api/queue/remove", { method: "POST", body: fd });
         const data = await res.json();
         cachedQueue = data.queue || [];
+        if (currentVideoMeta.filename) {
+          currentQueueIndex = cachedQueue.findIndex(it => it.filename === currentVideoMeta.filename);
+        }
         updateQueueCounts();
         renderQueueList();
         updateQueueBarState();
@@ -2296,7 +2587,11 @@
         const res = await fetch("/api/queue/shuffle", { method: "POST" });
         const data = await res.json();
         cachedQueue = data.queue || [];
+        if (currentVideoMeta.filename) {
+          currentQueueIndex = cachedQueue.findIndex(it => it.filename === currentVideoMeta.filename);
+        }
         renderQueueList();
+        updateQueueBarState();
         showToast("Queue shuffled");
       } catch (e) {
         console.error("Error shuffling queue:", e);
@@ -2307,6 +2602,7 @@
       try {
         await fetch("/api/queue/clear", { method: "POST" });
         cachedQueue = [];
+        currentQueueIndex = -1;
         updateQueueCounts();
         renderQueueList();
         updateQueueBarState();
@@ -2341,7 +2637,13 @@
 
       if (currentVideoMeta.filename) {
         titleEl.textContent = currentVideoMeta.title;
-        subEl.textContent = `Now Playing • ${cachedQueue.length} in queue`;
+        const qPos = currentQueueIndex >= 0 ? ` (${currentQueueIndex + 1}/${cachedQueue.length})` : '';
+        subEl.textContent = `Now Playing${qPos} • ${cachedQueue.length} in queue`;
+        if (currentVideoMeta.thumbnail_url) {
+          thumbEl.src = currentVideoMeta.thumbnail_url;
+        } else if (cachedQueue.length > 0) {
+          thumbEl.src = cachedQueue[0].thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60';
+        }
       } else if (cachedQueue.length > 0) {
         const first = cachedQueue[0];
         titleEl.textContent = first.title;
@@ -2363,27 +2665,27 @@
 
       const html = cachedQueue.map((item, idx) => {
         const thumb = item.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=60';
-        const isCurrent = item.filename === currentVideoMeta.filename;
+        const isCurrent = (currentQueueIndex === idx) || (item.filename === currentVideoMeta.filename);
 
         return `
-          <div class="queue-card-row ${isCurrent ? 'active-playing' : ''}" onclick="startPlayback('${item.stream_url}', '${encodeURIComponent(item.title)}', '', '${item.download_url}', '${encodeURIComponent(item.filename)}', '${encodeURIComponent(item.uploader || 'YouTube')}', 0, 0)">
+          <div class="queue-card-row ${isCurrent ? 'active-playing' : ''}" onclick="playQueueIndex(${idx})">
             <!-- Reorder Controls -->
             <div class="queue-reorder-btns" onclick="event.stopPropagation()">
-              <button class="btn-reorder" onclick="moveQueueItem('${item.key}', 'up')" title="Move Up">▲</button>
-              <button class="btn-reorder" onclick="moveQueueItem('${item.key}', 'down')" title="Move Down">▼</button>
+              <button class="btn-reorder" onclick="moveQueueItemByIndex(${idx}, 'up')" title="Move Up">▲</button>
+              <button class="btn-reorder" onclick="moveQueueItemByIndex(${idx}, 'down')" title="Move Down">▼</button>
             </div>
 
             <!-- Thumbnail -->
-            <img class="queue-item-thumb" src="${thumb}">
+            <img class="queue-item-thumb" src="${thumb}" alt="${escapeHtml(item.title)}">
 
             <!-- Info -->
             <div class="queue-item-meta">
-              <div class="queue-item-title">${idx + 1}. ${item.title}</div>
-              <div class="queue-item-sub">${item.uploader || 'YouTube Media'} • ${item.duration ? formatDuration(item.duration) : 'Video'}</div>
+              <div class="queue-item-title">${idx + 1}. ${escapeHtml(item.title)}</div>
+              <div class="queue-item-sub">${escapeHtml(item.uploader || 'YouTube Media')}${item.duration ? ` • ${formatDuration(item.duration)}` : ''}</div>
             </div>
 
             <!-- Remove Button -->
-            <button class="mini-btn" style="width: 26px; height: 26px; font-size: 11px; flex-shrink: 0;" onclick="event.stopPropagation(); removeQueueItemRemote('${item.key}')" title="Remove from queue">✕</button>
+            <button class="mini-btn" style="width: 26px; height: 26px; font-size: 11px; flex-shrink: 0;" onclick="event.stopPropagation(); removeQueueItemByIndex(${idx})" title="Remove from queue">✕</button>
           </div>
         `;
       }).join('');
@@ -2427,7 +2729,7 @@
 
             <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
               <!-- 1-Click Sync 4 Recent Videos -->
-              <button class="pill-action-btn btn-create" style="padding: 5px 10px; font-size: 12px;" onclick="syncChannelVideos('${ch.id}', '${encodeURIComponent(ch.name)}')">
+              <button class="pill-action-btn btn-create" style="padding: 5px 10px; font-size: 12px;" onclick="syncChannelVideos('${ch.id}')">
                 🔄 Sync 4 Videos
               </button>
               <button class="yt-dots-btn" style="width: 28px; height: 28px; font-size: 14px; color: #ff4d4d;" onclick="deleteChannel('${ch.id}')" title="Remove Channel">✕</button>
@@ -2437,8 +2739,9 @@
       }).join('');
     }
 
-    async function syncChannelVideos(channelId, encName) {
-      const chName = decodeURIComponent(encName);
+    async function syncChannelVideos(channelId, optName) {
+      const ch = cachedChannels.find(c => c.id === channelId);
+      const chName = optName || (ch ? ch.name : "Channel");
       showToast(`Syncing top 4 recent videos from "${chName}"...`);
       try {
         const fd = new FormData();
